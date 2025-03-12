@@ -93,7 +93,7 @@ program main
     real :: sum_gflops = 0
     real gflops
 
-    integer :: n_iters = 10
+    integer :: n_iters = 100
     integer :: i, j
 
     class(Benchmark), allocatable :: b
