@@ -2,6 +2,8 @@ program main
     use benchmark_base
     use blas_l2_benchmarks
     use blas_l3_benchmarks
+    use iso_fortran_env, only: int64
+
     implicit none
     
     external ddgemm
@@ -14,7 +16,10 @@ program main
 
     class(Benchmark), allocatable :: b
 
-    real :: start_time, end_time
+    integer(int64) start_count, end_count
+    integer(int64) count_rate, count_max
+
+    real elapsed_time
 
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
 
@@ -27,11 +32,13 @@ program main
         call b%setup()
 
         do j = 1, n_iters
-            call cpu_time(start_time)
+            call system_clock(start_count, count_rate, count_max)
             call b%run()
-            call cpu_time(end_time)
+            call system_clock(end_count, count_rate, count_max)
 
-            gflops = b%num_flops / (1000**3 * (end_time - start_time))
+            elapsed_time = real(end_count - start_count) / real(count_rate)
+
+            gflops = b%num_flops / (1000**3 * elapsed_time)
 
             sum_gflops = sum_gflops + gflops
         end do
