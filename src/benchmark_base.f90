@@ -1,8 +1,9 @@
 module benchmark_base
+    use iso_fortran_env, only: int64
     implicit none
 
     type, abstract :: Benchmark
-        integer :: num_flops
+        integer(int64) :: num_flops
         character(len=16) :: name
     contains
         procedure(setup_interface), deferred :: setup

@@ -1,10 +1,11 @@
 module blas_l2_benchmarks
+    use iso_fortran_env, only: int64
     use benchmark_base
     implicit none
 
     type, public, extends(Benchmark) :: DGEMVBenchmark
-        integer :: m = 1000
-        integer :: n = 1000
+        integer(int64) :: m = 1000
+        integer(int64) :: n = 1000
 
         double precision :: alpha = 1.0
         double precision :: beta = 1.0
