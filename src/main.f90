@@ -1,5 +1,6 @@
 program main
     use benchmark_base
+    use blas_l1_benchmarks
     use blas_l2_benchmarks
     use blas_l3_benchmarks
     use iso_fortran_env, only: int64
@@ -23,9 +24,11 @@ program main
 
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
 
-    allocate(benchmark_array(2))
+    allocate(benchmark_array(3))
     allocate(DGEMMBenchmark::benchmark_array(1)%b)
     allocate(DGEMVBenchmark::benchmark_array(2)%b)
+    allocate(DASUMBenchmark::benchmark_array(3)%b)
+    
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
