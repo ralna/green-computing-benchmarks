@@ -24,11 +24,19 @@ program main
 
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
 
+    character(len=20) :: filename
+    integer iunit
+
     allocate(benchmark_array(3))
     allocate(DGEMMBenchmark::benchmark_array(1)%b)
     allocate(DGEMVBenchmark::benchmark_array(2)%b)
     allocate(DASUMBenchmark::benchmark_array(3)%b)
     
+    filename = 'results.csv'
+    iunit = 1
+    open(iunit, file=filename, status='replace', action='write')
+
+    write(iunit, '(A)') 'Benchmark Name,Average peformance (GFLOPS/s)'
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
@@ -41,14 +49,15 @@ program main
 
             elapsed_time = real(end_count - start_count) / real(count_rate)
 
-            gflops = b%num_flops / (1000**3 * elapsed_time)
+            gflops = real(b%num_flops) / (1000**3 * elapsed_time)
 
             sum_gflops = sum_gflops + gflops
         end do
-
-    print *, "Average performace of ", b%name, ":", sum_gflops / n_iters, "GFLOPS/s"
+    
+    write(iunit, '(A, A, F11.7)') b%name, ',', sum_gflops / n_iters
 
     end do
 
+    close(iunit)
 
 end program main
