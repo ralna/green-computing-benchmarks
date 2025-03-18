@@ -1,8 +1,9 @@
 module benchmark_base
     use iso_fortran_env, only: int64
-    implicit none
+    implicit none (external)
+    private
 
-    type, abstract :: Benchmark
+    type, public, abstract :: Benchmark
         integer(int64) :: num_flops
         character(len=16) :: name
     contains
@@ -14,14 +15,16 @@ module benchmark_base
         class(Benchmark), allocatable :: b
     end type BenchmarkContainer
 
-    abstract interface 
+    abstract interface
         subroutine setup_interface(self)
             import
+            implicit none (external)
             class(Benchmark), intent(inout) :: self
         end subroutine setup_interface
-    
+
         subroutine run_interface(self)
             import
+            implicit none (external)
             class(Benchmark), intent(inout) :: self
         end subroutine run_interface
     end interface

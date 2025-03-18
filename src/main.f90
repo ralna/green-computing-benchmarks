@@ -1,37 +1,35 @@
 program main
-    use benchmark_base
-    use blas_l1_benchmarks
-    use blas_l2_benchmarks
-    use blas_l3_benchmarks
-    use iso_fortran_env, only: int64
+    use benchmark_base, only: Benchmark, BenchmarkContainer
+    use blas_l1_benchmarks, only: DASUMBenchmark
+    use blas_l2_benchmarks, only: DGEMVBenchmark
+    use blas_l3_benchmarks, only: DGEMMBenchmark
+    use iso_fortran_env, only: real64
 
-    implicit none
-    
-    external ddgemm
+    implicit none (external)
 
-    real :: sum_gflops = 0
-    real gflops
+    real(real64) :: sum_gflops = 0
+    real(real64) :: gflops
 
     integer :: n_iters = 100
     integer :: i, j
 
     class(Benchmark), allocatable :: b
 
-    integer(int64) start_count, end_count
-    integer(int64) count_rate, count_max
+    integer :: start_count, end_count
+    integer :: count_rate, count_max
 
-    real elapsed_time
+    real :: elapsed_time
 
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
 
     character(len=20) :: filename
-    integer iunit
+    integer :: iunit
 
     allocate(benchmark_array(3))
     allocate(DGEMMBenchmark::benchmark_array(1)%b)
     allocate(DGEMVBenchmark::benchmark_array(2)%b)
     allocate(DASUMBenchmark::benchmark_array(3)%b)
-    
+
     filename = 'results.csv'
     iunit = 1
     open(iunit, file=filename, status='replace', action='write')
@@ -53,7 +51,8 @@ program main
 
             sum_gflops = sum_gflops + gflops
         end do
-    
+
+
     write(iunit, '(A, A, F11.7)') b%name, ',', sum_gflops / n_iters
 
     end do

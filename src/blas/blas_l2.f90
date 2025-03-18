@@ -1,11 +1,13 @@
 module blas_l2_benchmarks
+    use benchmark_base, only: Benchmark
+    use blas_interfaces, only: dgemv
     use iso_fortran_env, only: int64
-    use benchmark_base
-    implicit none
+    implicit none (external)
+    private
 
     type, public, extends(Benchmark) :: DGEMVBenchmark
-        integer(int64) :: m = 1000
-        integer(int64) :: n = 1000
+        integer(int64) :: m = 2000
+        integer(int64) :: n = 2000
 
         double precision :: alpha = 1.0
         double precision :: beta = 1.0
@@ -17,28 +19,28 @@ module blas_l2_benchmarks
         contains
             procedure :: setup => setup_dgemv
             procedure :: run => run_dgemv
-        
+
     end type DGEMVBenchmark
-    
+
 contains
     subroutine setup_dgemv(self)
         class(DGEMVBenchmark), intent(inout) :: self
-        
+
         allocate(self%A(self%m , self%n))
         allocate(self%x(self%n))
         allocate(self%y(self%m))
-                
+
         call random_number(self%A)
         call random_number(self%x)
         call random_number(self%y)
-    
+
         self%num_flops = 2 * self%m * self%n
         self%name = "DGEMV"
-    
+
     end subroutine setup_dgemv
-    
+
     subroutine run_dgemv(self)
-        class(DGEMVBenchmark), intent(inout) :: self     
+        class(DGEMVBenchmark), intent(inout) :: self
         call dgemv(&
             "N",&
             self%m,&
@@ -54,5 +56,5 @@ contains
         )
 
     end subroutine run_dgemv
-    
+
 end module blas_l2_benchmarks
