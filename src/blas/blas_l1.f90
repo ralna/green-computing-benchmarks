@@ -6,7 +6,7 @@ module blas_l1_benchmarks
     private
 
     type, public, extends(Benchmark) :: DASUMBenchmark
-        integer(int64) :: n = 1E9
+        integer(int64) :: n = 1000
 
         double precision, dimension(:), allocatable :: x
 

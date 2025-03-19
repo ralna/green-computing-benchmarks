@@ -3,7 +3,7 @@ program main
     use blas_l1_benchmarks, only: DASUMBenchmark
     use blas_l2_benchmarks, only: DGEMVBenchmark
     use blas_l3_benchmarks, only: DGEMMBenchmark
-    use iso_fortran_env, only: real64
+    use iso_fortran_env, only: real64, int64
 
     implicit none (external)
 
@@ -15,10 +15,10 @@ program main
 
     class(Benchmark), allocatable :: b
 
-    integer :: start_count, end_count
-    integer :: count_rate, count_max
+    integer(int64) :: start_count, end_count
+    integer(int64) :: count_rate, count_max
 
-    real :: elapsed_time
+    real(real64) :: elapsed_time
 
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
 
@@ -34,7 +34,7 @@ program main
     iunit = 1
     open(iunit, file=filename, status='replace', action='write')
 
-    write(iunit, '(A)') 'Benchmark Name,Average peformance (GFLOPS/s)'
+    write(iunit, '(A)') 'Benchmark Name,Average performance (GFLOPS/s)'
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
@@ -50,7 +50,9 @@ program main
             gflops = real(b%num_flops) / (1000**3 * elapsed_time)
 
             sum_gflops = sum_gflops + gflops
+
         end do
+
 
 
     write(iunit, '(A, A, F11.7)') b%name, ',', sum_gflops / n_iters

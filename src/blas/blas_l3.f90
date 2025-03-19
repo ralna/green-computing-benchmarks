@@ -6,9 +6,9 @@ module blas_l3_benchmarks
     private
 
     type, public, extends(Benchmark) :: DGEMMBenchmark
-        integer(int64) :: m = 2000
-        integer(int64) :: n = 2000
-        integer(int64) :: k = 2000
+        integer(int64) :: m = 1000
+        integer(int64) :: n = 1000
+        integer(int64) :: k = 1000
 
         double precision :: alpha = 1.0
         double precision :: beta = 1.0
