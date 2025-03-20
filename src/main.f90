@@ -53,8 +53,6 @@ program main
 
         end do
 
-
-
     write(iunit, '(A, A, F11.7)') b%name, ',', sum_gflops / n_iters
 
     end do

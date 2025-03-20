@@ -28,14 +28,10 @@ subdir('src')
 # Build library   #
 ###################
 
-blas_name = get_option('blas')
-lapack_name = get_option('lapack')
 
-blas_dep = dependency(blas_name)
-lapack_dep = dependency(lapack_name)
+flexiblas_dep = dependency('flexiblas')
 
-deps += blas_dep
-deps += lapack_dep
+deps += flexiblas_dep
 
 executable(
             'green_computing_benchmark', src,
