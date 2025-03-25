@@ -14,8 +14,6 @@ headers = []
 include_dirs = []
 deps = []
 
-fs = import('fs')
-
 fc = meson.get_compiler('fortran')
 
 ###################
