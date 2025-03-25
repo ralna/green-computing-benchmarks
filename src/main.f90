@@ -23,6 +23,7 @@ program main
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
 
     character(len=20) :: filename
+    integer filename_status
     integer :: iunit
 
     allocate(benchmark_array(3))
@@ -30,7 +31,12 @@ program main
     allocate(DGEMVBenchmark::benchmark_array(2)%b)
     allocate(DASUMBenchmark::benchmark_array(3)%b)
 
-    filename = 'results.csv'
+    call get_command_argument(1, filename, status=filename_status)
+
+    if (filename_status > 0) then
+        filename = "results.csv"
+    end if
+
     iunit = 1
     open(iunit, file=filename, status='replace', action='write')
 

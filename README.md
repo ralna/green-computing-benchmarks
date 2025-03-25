@@ -15,7 +15,9 @@ meson compile -C builddir
 
 ## Running
 
-To run the benchmarks, run the `green_computing_benchmark` executable in `builddir`. This will write the results to `results.csv`. To change the BLAS backend benchmarks are run with, use:
+To run the benchmarks, run the `green_computing_benchmark` executable in `builddir`. By default this will write the results to `results.csv`. An alternative filename can be supplied as an additional command line argument.
+
+ To change the BLAS backend benchmarks are run with, use:
 
 ```
 FLEXIBLAS="YOUR_BLAS" ./green_computing_benchmark
