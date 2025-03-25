@@ -22,7 +22,7 @@ program main
 
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
 
-    character(len=20) :: filename
+    character(len=64) :: filename
     integer filename_status
     integer :: iunit
 
