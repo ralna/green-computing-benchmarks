@@ -1,4 +1,4 @@
-BLAS_BACKENDS=("NETLIB" "OPENBLASPTHREAD" "MKLOPENMP" "MKLSERIAL")
+BLAS_BACKENDS=$(flexiblas list -p | cut -d '|' -f 2)
 
 for B in ${BLAS_BACKENDS[@]};
 do
