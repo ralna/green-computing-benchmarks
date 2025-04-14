@@ -10,8 +10,6 @@ project('green_computing_benchmark', 'fortran',
 ###################
 
 src = []
-headers = []
-include_dirs = []
 deps = []
 
 fc = meson.get_compiler('fortran')
@@ -36,4 +34,5 @@ executable(
             dependencies: deps,
             link_language : 'fortran',
             install : true,
+            c_args: ['-O3']
         )

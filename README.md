@@ -9,7 +9,7 @@ The framework uses a [meson](https://mesonbuild.com/index.html) build system. It
 To install the framework, run:
 
 ```
-meson setup builddir
+meson setup builddir --optimization=3
 meson compile -C builddir
 ```
 
