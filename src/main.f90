@@ -9,8 +9,7 @@ program main
 
     implicit none (external)
 
-    real(real64) :: sum_gflops = 0
-    real(real64) :: gflops
+    real(real64) :: sum_flops, flops, avg_gflops
 
     integer :: n_iters = 100
     integer :: i, j
@@ -50,20 +49,26 @@ program main
         b = benchmark_array(i)%b
         call b%setup()
 
+        sum_flops = 0
+
         do j = 1, n_iters
             call system_clock(start_count, count_rate, count_max)
             call b%run()
             call system_clock(end_count, count_rate, count_max)
-
+            
+            !Time (s)
             elapsed_time = real(end_count - start_count) / real(count_rate)
 
-            gflops = real(b%num_flops) / (1000**3 * elapsed_time)
+            !FLOPS/s
+            flops = real(b%num_flops) / (elapsed_time)
 
-            sum_gflops = sum_gflops + gflops
+            sum_flops = sum_flops + flops
 
         end do
+        
+        avg_gflops = sum_flops / (1000.0**3 * n_iters)
 
-    write(iunit, '(A, A, F11.7)') b%name, ',', sum_gflops / n_iters
+        write(iunit, '(A, A, F11.7)') b%name, ',', avg_gflops
 
     end do
 
