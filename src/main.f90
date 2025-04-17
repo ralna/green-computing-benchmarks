@@ -3,6 +3,7 @@ program main
     use blas_l1_benchmarks, only: DASUMBenchmark
     use blas_l2_benchmarks, only: DGEMVBenchmark
     use blas_l3_benchmarks, only: DGEMMBenchmark
+    use custom_benchmarks, only: NaiveMatmulBenchmark
     use lapack_linsolve_benchmarks, only: DGESVBenchmark
     use iso_fortran_env, only: real64, int64
 
@@ -27,11 +28,12 @@ program main
     integer filename_status
     integer :: iunit
 
-    allocate(benchmark_array(4))
+    allocate(benchmark_array(5))
     allocate(DGEMMBenchmark::benchmark_array(1)%b)
     allocate(DGEMVBenchmark::benchmark_array(2)%b)
     allocate(DASUMBenchmark::benchmark_array(3)%b)
     allocate(DGESVBenchmark::benchmark_array(4)%b)
+    allocate(NaiveMatmulBenchmark::benchmark_array(5)%b)
 
     call get_command_argument(1, filename, status=filename_status)
 

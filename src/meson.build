@@ -7,4 +7,5 @@ src += files(
     'blas/blas_interfaces.f90',
     'lapack/lapack_linsolve.f90',
     'lapack/lapack_interfaces.f90',
+    'custom/custom.f90',
     )
