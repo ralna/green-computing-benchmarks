@@ -1,7 +1,7 @@
 module blas_l3_benchmarks
     use benchmark_base, only: Benchmark
     use blas_interfaces, only: dgemm
-    use iso_fortran_env, only: int64
+    use iso_fortran_env, only: int64, real64
     implicit none (external)
     private
 
@@ -18,30 +18,71 @@ module blas_l3_benchmarks
         double precision, dimension(:,:), allocatable :: C
 
         contains
-            procedure :: setup => setup_dgemm
+            procedure :: get_filename => get_filename
             procedure :: run => run_dgemm
+            procedure :: call_benchmark => call_dgemm
 
     end type DGEMMBenchmark
 
 contains
-    subroutine setup_dgemm(self)
+    function get_filename(self) result(filename)
         class(DGEMMBenchmark), intent(inout) :: self
+        character(len=64) :: filename
 
-        allocate(self%A(self%m , self%n))
-        allocate(self%B(self%n , self%k))
-        allocate(self%C(self%k , self%n))
+        filename = "results_DGEMM.csv" 
+        return
+    end function 
+    
+    subroutine run_dgemm(self, blas_name)
+        class(DGEMMBenchmark), intent(inout) :: self
+        character(len=16), intent(in) :: blas_name
 
-        call random_number(self%A)
-        call random_number(self%B)
-        call random_number(self%C)
+        integer :: i, iunit
+        real(real64) :: avg_gflops
+        character(len=64) :: filename
 
-        self%num_flops = 2 * self%m * self%n * self%k
+        iunit = 1
 
-        self%name = "DGEMM"
+        write(iunit, '(A)') 'Average performance of DGEMM (GFLOPS/s)'
+        write(iunit, '(A)') ',Matrix size,'
+        write(iunit, '(A)', advance='no') ','
 
-    end subroutine setup_dgemm
+        do i = 1, 3
+            write(iunit, '(I6A)', advance='no') 10**i, ','
+        end do
 
-    subroutine run_dgemm(self)
+        write(iunit, '(A)') ''
+
+        write(iunit, '(AA)', advance='no') blas_name, ','
+
+        do i = 1, 3
+            self%m = 10**i
+            self%n = 10**i
+            self%k = 10**i
+
+            allocate(self%A(self%m , self%n))
+            allocate(self%B(self%n , self%k))
+            allocate(self%C(self%k , self%n))
+
+            call random_number(self%A)
+            call random_number(self%B)
+            call random_number(self%C)
+
+            self%num_flops = 2 * self%m * self%n * self%k
+
+            avg_gflops = self%time_benchmark(100)
+
+            write(iunit, '(F11.7A)', advance='no') avg_gflops, ','
+
+            deallocate(self%A)
+            deallocate(self%B)
+            deallocate(self%C)
+        end do
+
+        write(iunit, '(A)') ''
+    end subroutine run_dgemm
+
+    subroutine call_dgemm(self)
         class(DGEMMBenchmark), intent(inout) :: self
         call dgemm(&
             "N",&
@@ -58,5 +99,5 @@ contains
             self%C,&
             self%n&
         )
-    end subroutine run_dgemm
+    end subroutine call_dgemm
 end module blas_l3_benchmarks
