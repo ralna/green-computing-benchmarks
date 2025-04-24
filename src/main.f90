@@ -9,24 +9,16 @@ program main
 
     implicit none (external)
 
-    real(real64) :: sum_flops, flops, avg_gflops
-
-    integer :: n_iters = 100
-    integer :: i, j
+    integer :: i
 
     class(Benchmark), allocatable :: b
-
-    integer(int64) :: start_count, end_count
-    integer(int64) :: count_rate, count_max
-
-    real(real64) :: elapsed_time
 
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
 
     character(len=64) :: filename
     character(len=16) :: blas_name
-    integer blas_name_status
     integer :: iunit
+    logical :: file_exists
 
     allocate(benchmark_array(1))
     allocate(DGEMMBenchmark::benchmark_array(1)%b)
@@ -35,19 +27,22 @@ program main
     ! allocate(DGESVBenchmark::benchmark_array(4)%b)
     ! allocate(NaiveMatmulBenchmark::benchmark_array(5)%b)
 
-    call get_command_argument(1, blas_name, status=blas_name_status)
-
-    if (blas_name_status > 0) then
-        blas_name = "Unknown BLAS"
-    end if
-
-    iunit = 1
-
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
+
+        call get_environment_variable("FLEXIBLAS", blas_name)
+
+
         filename = b%get_filename()
-        open(iunit, file=filename)
-        call b%run(blas_name)
+
+        inquire(file=filename, exist=file_exists)
+        open(newunit=iunit, file=filename, position="append")
+
+        if (.not. file_exists) then
+            call b%write_headers(iunit)
+        end if
+
+        call b%run(blas_name, iunit)
         close(iunit)
 
     end do

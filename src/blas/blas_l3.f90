@@ -18,42 +18,28 @@ module blas_l3_benchmarks
         double precision, dimension(:,:), allocatable :: C
 
         contains
-            procedure :: get_filename => get_filename
             procedure :: run => run_dgemm
             procedure :: call_benchmark => call_dgemm
+            procedure, nopass :: get_filename => dgemm_filename
+            procedure, nopass :: write_headers => dgemm_headers
 
     end type DGEMMBenchmark
 
 contains
-    function get_filename(self) result(filename)
-        class(DGEMMBenchmark), intent(inout) :: self
-        character(len=64) :: filename
-
-        filename = "results_DGEMM.csv" 
+    character(len=64) function dgemm_filename() result(filename)
+        filename = "results_DGEMM.csv"
         return
-    end function 
-    
-    subroutine run_dgemm(self, blas_name)
+    end function dgemm_filename
+
+    subroutine run_dgemm(self, blas_name, iunit)
         class(DGEMMBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
+        integer, intent(in) :: iunit
 
-        integer :: i, iunit
+        integer :: i
         real(real64) :: avg_gflops
-        character(len=64) :: filename
 
-        iunit = 1
-
-        write(iunit, '(A)') 'Average performance of DGEMM (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') ','
-
-        do i = 1, 3
-            write(iunit, '(I6A)', advance='no') 10**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-
-        write(iunit, '(AA)', advance='no') blas_name, ','
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = 1, 3
             self%m = 10**i
@@ -72,7 +58,7 @@ contains
 
             avg_gflops = self%time_benchmark(100)
 
-            write(iunit, '(F11.7A)', advance='no') avg_gflops, ','
+            write(iunit, '(F11.7,A)', advance='no') avg_gflops, ','
 
             deallocate(self%A)
             deallocate(self%B)
@@ -100,4 +86,21 @@ contains
             self%n&
         )
     end subroutine call_dgemm
+
+    subroutine dgemm_headers(iunit)
+        integer, intent(in) :: iunit
+        integer :: i
+
+        write(iunit, '(A)') 'Average performance of DGEMM (GFLOPS/s)'
+        write(iunit, '(A)') ',Matrix size,'
+        write(iunit, '(A)', advance='no') 'BLAS backend,'
+
+        do i = 1, 3
+            write(iunit, '(I6,A)', advance='no') 10**i, ','
+        end do
+
+        write(iunit, '(A)') ''
+    end subroutine dgemm_headers
+
+
 end module blas_l3_benchmarks
