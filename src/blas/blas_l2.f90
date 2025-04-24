@@ -1,7 +1,7 @@
 module blas_l2_benchmarks
     use benchmark_base, only: Benchmark
     use blas_interfaces, only: dgemv
-    use iso_fortran_env, only: int64
+    use iso_fortran_env, only: int64, real64
     implicit none (external)
     private
 
@@ -17,29 +17,57 @@ module blas_l2_benchmarks
         double precision, dimension(:), allocatable :: y
 
         contains
-            procedure :: setup => setup_dgemv
             procedure :: run => run_dgemv
+            procedure :: call_benchmark => call_dgemv
+            procedure, nopass :: get_filename => dgemv_filename
+            procedure, nopass :: write_headers => dgemv_headers
 
     end type DGEMVBenchmark
 
 contains
-    subroutine setup_dgemv(self)
+    character(len=64) function dgemv_filename() result(filename)
+        filename = "results_DGEMV.csv"
+        return
+    end function dgemv_filename
+
+    subroutine run_dgemv(self, blas_name, iunit)
         class(DGEMVBenchmark), intent(inout) :: self
+        character(len=16), intent(in) :: blas_name
+        integer, intent(in) :: iunit
 
-        allocate(self%A(self%m , self%n))
-        allocate(self%x(self%n))
-        allocate(self%y(self%m))
+        integer :: i
+        real(real64) :: avg_gflops
 
-        call random_number(self%A)
-        call random_number(self%x)
-        call random_number(self%y)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
-        self%num_flops = 2 * self%m * self%n
-        self%name = "DGEMV"
+        do i = 1, 3
+            self%m = 10**i
+            self%n = 10**i
 
-    end subroutine setup_dgemv
+            allocate(self%A(self%m , self%n))
+            allocate(self%x(self%n))
+            allocate(self%y(self%m))
+    
+            call random_number(self%A)
+            call random_number(self%x)
+            call random_number(self%y)
+    
+            self%num_flops = 2 * self%m * self%n
+    
+            avg_gflops = self%time_benchmark(100)
+    
+            write(iunit, '(F11.7,A)', advance='no') avg_gflops, ','
 
-    subroutine run_dgemv(self)
+            deallocate(self%A)
+            deallocate(self%x)
+            deallocate(self%y)
+        end do
+
+        write(iunit, '(A)') ''
+
+    end subroutine run_dgemv
+
+    subroutine call_dgemv(self)
         class(DGEMVBenchmark), intent(inout) :: self
         call dgemv(&
             "N",&
@@ -55,6 +83,21 @@ contains
             1&
         )
 
-    end subroutine run_dgemv
+    end subroutine call_dgemv
+
+    subroutine dgemv_headers(iunit)
+        integer, intent(in) :: iunit
+        integer :: i
+
+        write(iunit, '(3A)') 'Average performance of DGEMV (GFLOPS/s)'
+        write(iunit, '(A)') ',Matrix size,'
+        write(iunit, '(A)', advance='no') 'BLAS backend,'
+
+        do i = 1, 3
+            write(iunit, '(I6,A)', advance='no') 10**i, ','
+        end do
+
+        write(iunit, '(A)') ''
+    end subroutine dgemv_headers
 
 end module blas_l2_benchmarks
