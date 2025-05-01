@@ -41,10 +41,10 @@ contains
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 1, 3
-            self%m = 10**i
-            self%n = 10**i
-            self%k = 10**i
+        do i = 4, 14
+            self%m = 2**i
+            self%n = 2**i
+            self%k = 2**i
 
             allocate(self%A(self%m , self%n))
             allocate(self%B(self%n , self%k))
