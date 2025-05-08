@@ -46,7 +46,7 @@ contains
 
             allocate(self%A(self%m , self%n))
             allocate(self%x(self%n))
-            allocate(self%y(self%m))
+            allocate(self%y(self%n))
     
             call random_number(self%A)
             call random_number(self%x)
