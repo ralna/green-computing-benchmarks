@@ -5,6 +5,7 @@ program main
     use blas_l3_benchmarks, only: DGEMMBenchmark
     use custom_benchmarks, only: NaiveMatmulBenchmark
     use lapack_linsolve_benchmarks, only: DGESVBenchmark
+    use pblas_l2_benchmarks, only: PDGEMVBenchmark
     use iso_fortran_env, only: real64, int64
 
     implicit none (external)
@@ -20,18 +21,18 @@ program main
     integer :: iunit
     logical :: file_exists
 
-    allocate(benchmark_array(5))
-    allocate(DGEMMBenchmark::benchmark_array(1)%b)
-    allocate(DGEMVBenchmark::benchmark_array(2)%b)
-    allocate(DASUMBenchmark::benchmark_array(3)%b)
-    allocate(DGESVBenchmark::benchmark_array(4)%b)
-    allocate(NaiveMatmulBenchmark::benchmark_array(5)%b)
+    allocate(benchmark_array(1))
+    ! allocate(DGEMMBenchmark::benchmark_array(1)%b)
+    ! allocate(DGEMVBenchmark::benchmark_array(2)%b)
+    ! allocate(DASUMBenchmark::benchmark_array(3)%b)
+    ! allocate(DGESVBenchmark::benchmark_array(4)%b)
+    ! allocate(NaiveMatmulBenchmark::benchmark_array(5)%b)
+    allocate(PDGEMVBenchmark::benchmark_array(1)%b)
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
 
         call get_environment_variable("FLEXIBLAS", blas_name)
-
 
         filename = b%get_filename()
 
@@ -46,7 +47,5 @@ program main
         close(iunit)
 
     end do
-
-    close(iunit)
 
 end program main

@@ -1,4 +1,4 @@
-project('green_computing_benchmark', 'fortran',
+project('green_computing_benchmark', 'fortran', 'c',
   version : '0.1.0',
   default_options : [
     'warning_level=3'
@@ -26,8 +26,13 @@ subdir('src')
 
 
 flexiblas_dep = dependency('flexiblas')
-
 deps += flexiblas_dep
+
+scalapack_dep = dependency('scalapack')
+deps += scalapack_dep
+
+mpi_dep = dependency('mpi')
+deps += mpi_dep
 
 executable(
             'green_computing_benchmark', src,

@@ -8,4 +8,5 @@ src += files(
     'lapack/lapack_linsolve.f90',
     'lapack/lapack_interfaces.f90',
     'custom/custom.f90',
+    'pblas/pblas_l2.f90'
     )
