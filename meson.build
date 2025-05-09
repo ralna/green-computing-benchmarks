@@ -24,6 +24,8 @@ subdir('src')
 # Build library   #
 ###################
 
+benchmark_base = library('benchmarkbase', 'src/benchmark_base.f90')
+
 
 flexiblas_dep = dependency('flexiblas')
 deps += flexiblas_dep
@@ -39,5 +41,5 @@ executable(
             dependencies: deps,
             link_language : 'fortran',
             install : true,
-            c_args: ['-O3']
+            link_with: benchmark_base
         )
