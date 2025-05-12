@@ -41,7 +41,7 @@ contains
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 4, 14
+        do i = 4, 10
             self%m = 2**i
             self%n = 2**i
             self%k = 2**i
@@ -95,8 +95,8 @@ contains
         write(iunit, '(A)') ',Matrix size,'
         write(iunit, '(A)', advance='no') 'BLAS backend,'
 
-        do i = 1, 3
-            write(iunit, '(I6,A)', advance='no') 10**i, ','
+        do i = 4, 10
+            write(iunit, '(I6,A)', advance='no') 2**i, ','
         end do
 
         write(iunit, '(A)') ''

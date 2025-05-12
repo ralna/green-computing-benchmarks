@@ -68,7 +68,7 @@ contains
             write(iunit, '(2A)', advance='no') blas_name, ','
         end if
 
-        do i = 4, 15
+        do i = 4, 10
             self%m = 2**i
             self%n = 2**i
 
@@ -148,7 +148,7 @@ contains
         write(iunit, '(A)') ',Matrix size,'
         write(iunit, '(A)', advance='no') 'BLAS backend,'
 
-        do i = 4, 15
+        do i = 4, 10
             write(iunit, '(I6,A)', advance='no') 2**i, ','
         end do
 
