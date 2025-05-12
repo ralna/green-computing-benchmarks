@@ -9,7 +9,8 @@ project('green_computing_benchmark', 'fortran', 'c',
 # Setup           #
 ###################
 
-src = []
+serial_src = []
+mpi_src = []
 deps = []
 
 fc = meson.get_compiler('fortran')
@@ -18,7 +19,8 @@ fc = meson.get_compiler('fortran')
 # Define sources  #
 ###################
 
-subdir('src')
+subdir('src/serial')
+subdir('src/mpi')
 
 ###################
 # Build library   #
@@ -30,6 +32,14 @@ benchmark_base = library('benchmarkbase', 'src/benchmark_base.f90')
 flexiblas_dep = dependency('flexiblas')
 deps += flexiblas_dep
 
+executable(
+  'green_computing_benchmark', serial_src,
+  dependencies: deps,
+  link_language : 'fortran',
+  install : true,
+  link_with: benchmark_base
+)
+
 scalapack_dep = dependency('scalapack')
 deps += scalapack_dep
 
@@ -37,9 +47,9 @@ mpi_dep = dependency('mpi')
 deps += mpi_dep
 
 executable(
-            'green_computing_benchmark', src,
-            dependencies: deps,
-            link_language : 'fortran',
-            install : true,
-            link_with: benchmark_base
-        )
+  'green_computing_benchmark_mpi', mpi_src,
+  dependencies: deps,
+  link_language : 'fortran',
+  install : true,
+  link_with: benchmark_base
+)
