@@ -11,6 +11,7 @@ project('green_computing_benchmark', 'fortran', 'c',
 
 serial_src = []
 mpi_src = []
+gpu_src = []
 deps = []
 
 fc = meson.get_compiler('fortran')
@@ -21,6 +22,7 @@ fc = meson.get_compiler('fortran')
 
 subdir('src/serial')
 subdir('src/mpi')
+subdir('src/gpu')
 
 ###################
 # Build library   #
@@ -48,6 +50,17 @@ deps += mpi_dep
 
 executable(
   'green_computing_benchmark_mpi', mpi_src,
+  dependencies: deps,
+  link_language : 'fortran',
+  install : true,
+  link_with: benchmark_base
+)
+
+slate_dep = dependency('slate')
+deps += slate_dep
+
+executable(
+  'green_computing_benchmark_gpu', gpu_src,
   dependencies: deps,
   link_language : 'fortran',
   install : true,
