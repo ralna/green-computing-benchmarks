@@ -1,7 +1,7 @@
 module blas_interfaces
     implicit none (external)
     private
-    public dgemm, dgemv, dasum, daxpy
+    public dgemm, sgemm, dgemv, dasum, daxpy
 
     interface
         subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
@@ -15,6 +15,18 @@ module blas_interfaces
             double precision, intent(in) :: b(ldb, n)
             double precision, intent(inout) :: c(ldc, n)
         end subroutine dgemm
+
+        subroutine sgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
+            use iso_fortran_env, only: int64
+            implicit none (external)
+
+            character(len=*), intent(in) :: transa, transb
+            integer(int64), intent(in) :: m, n, k, lda, ldb, ldc
+            real, intent(in) :: alpha, beta
+            real, intent(in) :: a(lda, k)
+            real, intent(in) :: b(ldb, n)
+            real, intent(inout) :: c(ldc, n)
+        end subroutine sgemm
 
         subroutine dgemv(trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
             use iso_fortran_env, only: int64
