@@ -9,9 +9,10 @@ project('green_computing_benchmark', 'fortran', 'c',
 # Setup           #
 ###################
 
-serial_src = []
+blas_src = []
 mpi_src = []
 gpu_src = []
+misc_src = []
 deps = []
 
 fc = meson.get_compiler('fortran')
@@ -20,9 +21,10 @@ fc = meson.get_compiler('fortran')
 # Define sources  #
 ###################
 
-subdir('src/serial')
+subdir('src/blas')
 subdir('src/mpi')
 subdir('src/gpu')
+subdir('src/misc')
 
 ###################
 # Build library   #
@@ -30,12 +32,19 @@ subdir('src/gpu')
 
 benchmark_base = library('benchmarkbase', 'src/benchmark_base.f90')
 
+executable(
+  'benchmark_misc', misc_src,
+  dependencies: deps,
+  link_language : 'fortran',
+  install : true,
+  link_with: benchmark_base
+)
 
 flexiblas_dep = dependency('flexiblas')
 deps += flexiblas_dep
 
 executable(
-  'green_computing_benchmark', serial_src,
+  'benchmark_blas', blas_src,
   dependencies: deps,
   link_language : 'fortran',
   install : true,
@@ -49,7 +58,7 @@ mpi_dep = dependency('mpi')
 deps += mpi_dep
 
 executable(
-  'green_computing_benchmark_mpi', mpi_src,
+  'benchmark_mpi', mpi_src,
   dependencies: deps,
   link_language : 'fortran',
   install : true,
@@ -60,7 +69,7 @@ slate_dep = dependency('slate')
 deps += slate_dep
 
 executable(
-  'green_computing_benchmark_gpu', gpu_src,
+  'benchmark_gpu', gpu_src,
   dependencies: deps,
   link_language : 'fortran',
   install : true,
