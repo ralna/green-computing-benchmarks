@@ -1,6 +1,5 @@
 module custom_benchmarks
     use benchmark_base, only: Benchmark
-    use blas_interfaces, only: dgemv
     use iso_fortran_env, only: int64, real64
     implicit none (external)
     private
