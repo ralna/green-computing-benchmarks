@@ -1,11 +1,9 @@
 program main
     use benchmark_base, only: Benchmark, BenchmarkContainer
-    use blas_l1_benchmarks, only: DASUMBenchmark, SASUMBenchmark
-    use blas_l2_benchmarks, only: DGEMVBenchmark, SGEMVBenchmark
-    use blas_l3_benchmarks, only: DGEMMBenchmark
-    use custom_benchmarks, only: NaiveMatmulBenchmark
-    use lapack_linsolve_benchmarks, only: DGESVBenchmark
+    use slate_benchmarks, only: SLATE_MULT_DBenchmark, SLATE_MULT_SBenchmark
     use iso_fortran_env, only: real64, int64
+    use iso_c_binding, only: c_int
+    use mpi
 
     implicit none (external)
 
@@ -20,14 +18,13 @@ program main
     integer :: iunit
     logical :: file_exists
 
-    allocate(benchmark_array(6))
-    allocate(DGEMMBenchmark::benchmark_array(1)%b)
-    allocate(DGEMVBenchmark::benchmark_array(2)%b)
-    allocate(SGEMVBenchmark::benchmark_array(3)%b)
-    allocate(DASUMBenchmark::benchmark_array(4)%b)
-    allocate(SASUMBenchmark::benchmark_array(5)%b)
-    allocate(DGESVBenchmark::benchmark_array(6)%b)
-    allocate(NaiveMatmulBenchmark::benchmark_array(7)%b)
+    integer(kind=c_int) :: provided, ierr
+
+    allocate(benchmark_array(2))
+    allocate(SLATE_MULT_DBenchmark::benchmark_array(1)%b)
+    allocate(SLATE_MULT_SBenchmark::benchmark_array(2)%b)
+
+    call MPI_Init_thread( MPI_THREAD_MULTIPLE, provided, ierr )
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
