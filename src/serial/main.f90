@@ -1,7 +1,7 @@
 program main
     use benchmark_base, only: Benchmark, BenchmarkContainer
-    use blas_l1_benchmarks, only: DASUMBenchmark
-    use blas_l2_benchmarks, only: DGEMVBenchmark
+    use blas_l1_benchmarks, only: DASUMBenchmark, SASUMBenchmark
+    use blas_l2_benchmarks, only: DGEMVBenchmark, SGEMVBenchmark
     use blas_l3_benchmarks, only: DGEMMBenchmark
     use custom_benchmarks, only: NaiveMatmulBenchmark
     use lapack_linsolve_benchmarks, only: DGESVBenchmark
@@ -20,12 +20,14 @@ program main
     integer :: iunit
     logical :: file_exists
 
-    allocate(benchmark_array(5))
+    allocate(benchmark_array(6))
     allocate(DGEMMBenchmark::benchmark_array(1)%b)
     allocate(DGEMVBenchmark::benchmark_array(2)%b)
-    allocate(DASUMBenchmark::benchmark_array(3)%b)
-    allocate(DGESVBenchmark::benchmark_array(4)%b)
-    allocate(NaiveMatmulBenchmark::benchmark_array(5)%b)
+    allocate(SGEMVBenchmark::benchmark_array(3)%b)
+    allocate(DASUMBenchmark::benchmark_array(4)%b)
+    allocate(SASUMBenchmark::benchmark_array(5)%b)
+    allocate(DGESVBenchmark::benchmark_array(6)%b)
+    allocate(NaiveMatmulBenchmark::benchmark_array(7)%b)
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
