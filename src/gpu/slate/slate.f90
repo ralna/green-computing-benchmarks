@@ -20,9 +20,6 @@ module slate_benchmarks
         contains
             procedure :: run => run_slate_mult_d
             procedure :: call_benchmark => call_slate_mult_d
-            procedure, nopass :: get_filename => slate_mult_d_filename
-            procedure, nopass :: write_headers => slate_mult_d_headers
-
     end type SLATE_MULT_DBenchmark
 
     type, public, extends(Benchmark) :: SLATE_MULT_SBenchmark
@@ -38,44 +35,30 @@ module slate_benchmarks
         contains
             procedure :: run => run_slate_mult_s
             procedure :: call_benchmark => call_slate_mult_s
-            procedure, nopass :: get_filename => slate_mult_s_filename
-            procedure, nopass :: write_headers => slate_mult_s_headers
-
     end type SLATE_MULT_SBenchmark
 
 contains
-    character(len=64) function slate_mult_d_filename() result(filename)
-        filename = "results_SLATE_MULT_D.csv"
-        return
-    end function slate_mult_d_filename
-
-    character(len=64) function slate_mult_s_filename() result(filename)
-        filename = "results_SLATE_MULT_S.csv"
-        return
-    end function slate_mult_s_filename
-
-    subroutine run_slate_mult_d(self, blas_name, iunit)
+    subroutine run_slate_mult_d(self, blas_name)
         class(SLATE_MULT_DBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
-        integer, intent(in) :: iunit
-
-        integer :: i
+           
+        integer :: i, iunit
         real(real64) :: avg_gflops
 
-        integer(kind=c_int) :: p_grid, q_grid, mpi_size, ierr
+        self%name = "SLATE_MULT_D"
 
-        !Block size
-        integer(int64) :: nb = 256
-
-        call MPI_Comm_size( MPI_COMM_WORLD, mpi_size, ierr )
-        call grid_size( mpi_size, p_grid, q_grid ) 
+        call self%open_results_file(iunit)
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 10, 15
-            self%m = 2**i
-            self%n = 2**i
-            self%k = 2**i
+        self%min_exp = 10
+        self%max_exp = 15
+        self%base = 2
+
+        do i = self%min_exp, self%max_exp
+            self%m = self%base**i
+            self%n = self%base**i
+            self%k = self%base**i
             
             self%A = slate_Matrix_create_r64(self%m, self%k, nb, p_grid, q_grid, MPI_COMM_WORLD)
             self%B = slate_Matrix_create_r64(self%k, self%n, nb, p_grid, q_grid, MPI_COMM_WORLD)
@@ -97,30 +80,30 @@ contains
         end do
 
         write(iunit, '(A)') ''
+        close(iunit)
     end subroutine run_slate_mult_d
 
-    subroutine run_slate_mult_s(self, blas_name, iunit)
+    subroutine run_slate_mult_s(self, blas_name)
         class(SLATE_MULT_SBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
-        integer, intent(in) :: iunit
-
-        integer :: i
+        
+        integer :: i, iunit
         real(real64) :: avg_gflops
 
-        integer(kind=c_int) :: p_grid, q_grid, mpi_size, ierr
+        self%name = "SLATE_MULT_S"
 
-        !Block size
-        integer(int64) :: nb = 256
-
-        call MPI_Comm_size( MPI_COMM_WORLD, mpi_size, ierr )
-        call grid_size( mpi_size, p_grid, q_grid ) 
+        call self%open_results_file(iunit)
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 10, 15
-            self%m = 2**i
-            self%n = 2**i
-            self%k = 2**i
+        self%min_exp = 10
+        self%max_exp = 15
+        self%base = 2
+
+        do i = self%min_exp, self%max_exp
+            self%m = self%base**i
+            self%n = self%base**i
+            self%k = self%base**i
 
             self%A = slate_Matrix_create_r32(self%m, self%k, nb, p_grid, q_grid, MPI_COMM_WORLD)
             self%B = slate_Matrix_create_r32(self%k, self%n, nb, p_grid, q_grid, MPI_COMM_WORLD)
@@ -142,6 +125,8 @@ contains
         end do
 
         write(iunit, '(A)') ''
+        close(iunit)
+
     end subroutine run_slate_mult_s
 
     subroutine call_slate_mult_d(self)
@@ -167,36 +152,4 @@ contains
             self%opts&
         )
     end subroutine call_slate_mult_s
-
-    subroutine slate_mult_d_headers(iunit)
-        integer, intent(in) :: iunit
-        integer :: i
-
-        write(iunit, '(A)') 'Average performance of SLATE_MULT_D (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') 'BLAS backend,'
-
-        do i = 10, 15
-            write(iunit, '(I6,A)', advance='no') 2**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-    end subroutine slate_mult_d_headers
-
-    subroutine slate_mult_s_headers(iunit)
-        integer, intent(in) :: iunit
-        integer :: i
-
-        write(iunit, '(A)') 'Average performance of SLATE_MULT_S (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') 'BLAS backend,'
-
-        do i = 10, 15
-            write(iunit, '(I6,A)', advance='no') 2**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-    end subroutine slate_mult_s_headers
-
-
 end module slate_benchmarks

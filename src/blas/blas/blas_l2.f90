@@ -19,9 +19,6 @@ module blas_l2_benchmarks
         contains
             procedure :: run => run_dgemv
             procedure :: call_benchmark => call_dgemv
-            procedure, nopass :: get_filename => dgemv_filename
-            procedure, nopass :: write_headers => dgemv_headers
-
     end type DGEMVBenchmark
 
     type, public, extends(Benchmark) :: SGEMVBenchmark
@@ -38,30 +35,28 @@ module blas_l2_benchmarks
         contains
             procedure :: run => run_sgemv
             procedure :: call_benchmark => call_sgemv
-            procedure, nopass :: get_filename => sgemv_filename
-            procedure, nopass :: write_headers => sgemv_headers
-
     end type SGEMVBenchmark
 
 contains
-    character(len=64) function dgemv_filename() result(filename)
-        filename = "results_DGEMV.csv"
-        return
-    end function dgemv_filename
-
-    subroutine run_dgemv(self, blas_name, iunit)
+    subroutine run_dgemv(self, blas_name)
         class(DGEMVBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
-        integer, intent(in) :: iunit
-
-        integer :: i
+        integer :: i, iunit
         real(real64) :: avg_gflops
+
+        self%name = "DGEMV"
+
+        call self%open_results_file(iunit)
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 1, 3
-            self%m = 10**i
-            self%n = 10**i
+        self%min_exp = 1
+        self%max_exp = 3
+        self%base = 10
+
+        do i = self%min_exp, self%max_exp
+            self%m = self%base**i
+            self%n = self%base**i
 
             allocate(self%A(self%m , self%n))
             allocate(self%x(self%n))
@@ -83,6 +78,8 @@ contains
         end do
 
         write(iunit, '(A)') ''
+
+        close(iunit)
 
     end subroutine run_dgemv
 
@@ -104,39 +101,25 @@ contains
 
     end subroutine call_dgemv
 
-    subroutine dgemv_headers(iunit)
-        integer, intent(in) :: iunit
-        integer :: i
-
-        write(iunit, '(3A)') 'Average performance of DGEMV (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') 'BLAS backend,'
-
-        do i = 1, 3
-            write(iunit, '(I6,A)', advance='no') 10**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-    end subroutine dgemv_headers
-
-    character(len=64) function sgemv_filename() result(filename)
-        filename = "results_SGEMV.csv"
-        return
-    end function sgemv_filename
-
-    subroutine run_sgemv(self, blas_name, iunit)
+    subroutine run_sgemv(self, blas_name)
         class(SGEMVBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
-        integer, intent(in) :: iunit
-
-        integer :: i
+        integer :: i, iunit
         real(real64) :: avg_gflops
+
+        self%name = "SGEMV"
+
+        call self%open_results_file(iunit)
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 1, 3
-            self%m = 10**i
-            self%n = 10**i
+        self%min_exp = 1
+        self%max_exp = 3
+        self%base = 10
+
+        do i = self%min_exp, self%max_exp
+            self%m = self%base**i
+            self%n = self%base**i
 
             allocate(self%A(self%m , self%n))
             allocate(self%x(self%n))
@@ -159,6 +142,8 @@ contains
 
         write(iunit, '(A)') ''
 
+        close(iunit)
+
     end subroutine run_sgemv
 
     subroutine call_sgemv(self)
@@ -178,20 +163,4 @@ contains
         )
 
     end subroutine call_sgemv
-
-    subroutine sgemv_headers(iunit)
-        integer, intent(in) :: iunit
-        integer :: i
-
-        write(iunit, '(3A)') 'Average performance of SGEMV (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') 'BLAS backend,'
-
-        do i = 1, 3
-            write(iunit, '(I6,A)', advance='no') 10**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-    end subroutine sgemv_headers
-
 end module blas_l2_benchmarks

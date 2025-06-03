@@ -18,31 +18,30 @@ module custom_benchmarks
         contains
             procedure :: run => run_naive_matmul
             procedure :: call_benchmark => call_naive_matmul
-            procedure, nopass :: get_filename => naive_matmul_filename
-            procedure, nopass :: write_headers => naive_matmul_headers
-
     end type NaiveMatmulBenchmark
 
 contains
-    character(len=64) function naive_matmul_filename() result(filename)
-        filename = "results_NAIVE_MATMUL.csv"
-        return
-    end function naive_matmul_filename
-
-    subroutine run_naive_matmul(self, blas_name, iunit)
+    subroutine run_naive_matmul(self, blas_name)
         class(NaiveMatmulBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
-        integer, intent(in) :: iunit
-
-        integer :: i
+   
+        integer :: i, iunit
         real(real64) :: avg_gflops
+
+        self%name = "NAIVE_MATMUL"
+
+        call self%open_results_file(iunit)
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 1, 3
-            self%m = 10**i
-            self%n = 10**i
-            self%k = 10**i
+        self%min_exp = 1
+        self%max_exp = 3
+        self%base = 10
+
+        do i = self%min_exp, self%max_exp
+            self%m = self%base**i
+            self%n = self%base**i
+            self%k = self%base**i
 
             allocate(self%A(self%m, self%n))
             allocate(self%B(self%n, self%k))
@@ -67,6 +66,7 @@ contains
         end do
 
         write(iunit, '(A)') ''
+        close(iunit)
     end subroutine run_naive_matmul
 
     subroutine call_naive_matmul(self)
@@ -100,22 +100,4 @@ contains
         end do
     
     end subroutine naive_matmul
-
-    subroutine naive_matmul_headers(iunit)
-        integer, intent(in) :: iunit
-        integer :: i
-
-        write(iunit, '(A)') 'Average performance of Naive MATMUL (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') 'BLAS backend,'
-
-        do i = 1, 3
-            write(iunit, '(I6,A)', advance='no') 10**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-    end subroutine naive_matmul_headers
-
-
-
 end module custom_benchmarks

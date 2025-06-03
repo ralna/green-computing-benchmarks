@@ -5,11 +5,15 @@ module benchmark_base
 
     type, public, abstract :: Benchmark
         integer(int64) :: num_flops
+        character(len=32) :: name
+
+        integer :: min_exp, max_exp, base
+
         contains
             procedure(run), deferred :: run
             procedure(call_benchmark), deferred :: call_benchmark
-            procedure(get_filename), nopass, deferred :: get_filename
-            procedure(write_headers), nopass, deferred :: write_headers
+            procedure :: open_results_file
+            procedure :: get_filename
             procedure :: time_benchmark
     end type Benchmark
 
@@ -18,12 +22,11 @@ module benchmark_base
     end type BenchmarkContainer
 
     abstract interface
-        subroutine run(self, blas_name, iunit)
+        subroutine run(self, blas_name)
             import
             implicit none (external)
             class(Benchmark), intent(inout) :: self
             character(len=16), intent(in) :: blas_name
-            integer, intent(in) :: iunit
         end subroutine run
 
         subroutine call_benchmark(self)
@@ -31,20 +34,16 @@ module benchmark_base
             implicit none (external)
             class(Benchmark), intent(inout) :: self
         end subroutine call_benchmark
-
-        character(len=64) function get_filename() result(filename)
-            import
-            implicit none (external)
-        end function get_filename
-
-        subroutine write_headers(iunit)
-            import
-            implicit none (external)
-            integer, intent(in) :: iunit
-        end subroutine write_headers
     end interface
 
     contains
+        character(len=64) function get_filename(self) result(filename)
+            class(Benchmark), intent(inout) :: self
+
+            filename = "results_"//trim(self%name)//".csv"
+            return
+        end function get_filename
+
         function time_benchmark(self, n_iters) result(avg_gflops)
             class(Benchmark), intent(inout) :: self
             integer, intent(in) :: n_iters
@@ -78,5 +77,31 @@ module benchmark_base
             avg_gflops = sum_flops / (1000.0**3 * n_iters)
             return
         end function time_benchmark
+
+        subroutine open_results_file(self, iunit)
+            class(Benchmark), intent(inout) :: self
+            integer, intent(out) :: iunit
+
+            integer :: i
+            character(len = 64) :: filename
+            logical :: file_exists
+
+            filename = self%get_filename()
+
+            inquire(file=filename, exist=file_exists)
+            open(newunit=iunit, file=filename, position="append")
+    
+            if (.not. file_exists) then
+                write(iunit, '(3A)') 'Average performance of', self%name, '(GFLOPS/s)'
+                write(iunit, '(A)') ',Problem size,'
+                write(iunit, '(A)', advance='no') 'BLAS backend,'
+    
+                do i = self%min_exp, self%max_exp
+                    write(iunit, '(I6,A)', advance='no') self%base**i, ','
+                end do
+    
+                write(iunit, '(A)') ''
+                end if
+        end subroutine open_results_file
 
 end module benchmark_base

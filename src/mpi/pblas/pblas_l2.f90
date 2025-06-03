@@ -27,21 +27,12 @@ module pblas_l2_benchmarks
         contains
             procedure :: run => run_pdgemv
             procedure :: call_benchmark => call_pdgemv
-            procedure, nopass :: get_filename => pdgemv_filename
-            procedure, nopass :: write_headers => pdgemv_headers
-
     end type PDGEMVBenchmark
 
 contains
-    character(len=64) function pdgemv_filename() result(filename)
-        filename = "results_PDGEMV.csv"
-        return
-    end function pdgemv_filename
-
-    subroutine run_pdgemv(self, blas_name, iunit)
+    subroutine run_pdgemv(self, blas_name)
         class(PDGEMVBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
-        integer, intent(in) :: iunit
 
         integer:: iam,nprocs,nprow,npcol
         integer :: myrow, mycol
@@ -49,7 +40,7 @@ contains
         integer(int64):: mb,nb
         integer:: llda,lldb,info
 
-        integer :: i
+        integer :: i, iunit
         real(real64) :: avg_gflops
 
         call blacs_pinfo(iam,nprocs)
@@ -65,12 +56,17 @@ contains
         csrc=0
 
         if ((myrow == 0) .and. (mycol == 0)) then
+            call self%open_results_file(iunit)
             write(iunit, '(2A)', advance='no') blas_name, ','
         end if
 
-        do i = 4, 10
-            self%m = 2**i
-            self%n = 2**i
+        self%min_exp = 4
+        self%max_exp = 10
+        self%base = 2
+
+        do i = self%min_exp, self%max_exp
+            self%m = self%base**i
+            self%n = self%base**i
 
             mb = self%m / nprow
             nb = self%n / npcol
@@ -105,6 +101,7 @@ contains
             
         if (myrow == 0 .and. mycol == 0) then
             write(iunit, '(A)') ''
+            close(iunit)
         end if
 
         call blacs_gridexit(self%ictxt)
@@ -139,20 +136,4 @@ contains
         return
 
     end subroutine call_pdgemv
-
-    subroutine pdgemv_headers(iunit)
-        integer, intent(in) :: iunit
-        integer :: i
-
-        write(iunit, '(3A)') 'Average performance of PDGEMV (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') 'BLAS backend,'
-
-        do i = 4, 10
-            write(iunit, '(I6,A)', advance='no') 2**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-    end subroutine pdgemv_headers
-
 end module pblas_l2_benchmarks

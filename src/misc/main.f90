@@ -22,18 +22,7 @@ program main
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
 
-        filename = b%get_filename()
-
-        inquire(file=filename, exist=file_exists)
-        open(newunit=iunit, file=filename, position="append")
-
-        if (.not. file_exists) then
-            call b%write_headers(iunit)
-        end if
-
-        call b%run("N/A", iunit)
-        close(iunit)
-
+        call b%run("N/A")
     end do
 
 end program main

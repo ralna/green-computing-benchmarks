@@ -31,18 +31,7 @@ program main
 
         call get_environment_variable("FLEXIBLAS", blas_name)
 
-        filename = b%get_filename()
-
-        inquire(file=filename, exist=file_exists)
-        open(newunit=iunit, file=filename, position="append")
-
-        if (.not. file_exists) then
-            call b%write_headers(iunit)
-        end if
-
-        call b%run(blas_name, iunit)
-        close(iunit)
-
+        call b%run(blas_name)
     end do
 
 end program main

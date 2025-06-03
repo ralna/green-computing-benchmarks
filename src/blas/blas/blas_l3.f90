@@ -20,9 +20,6 @@ module blas_l3_benchmarks
         contains
             procedure :: run => run_dgemm
             procedure :: call_benchmark => call_dgemm
-            procedure, nopass :: get_filename => dgemm_filename
-            procedure, nopass :: write_headers => dgemm_headers
-
     end type DGEMMBenchmark
 
     type, public, extends(Benchmark) :: SGEMMBenchmark
@@ -40,36 +37,30 @@ module blas_l3_benchmarks
         contains
             procedure :: run => run_sgemm
             procedure :: call_benchmark => call_sgemm
-            procedure, nopass :: get_filename => sgemm_filename
-            procedure, nopass :: write_headers => sgemm_headers
-
     end type SGEMMBenchmark
 
 contains
-    character(len=64) function dgemm_filename() result(filename)
-        filename = "results_DGEMM.csv"
-        return
-    end function dgemm_filename
-
-    character(len=64) function sgemm_filename() result(filename)
-        filename = "results_SGEMM.csv"
-        return
-    end function sgemm_filename
-
-    subroutine run_dgemm(self, blas_name, iunit)
+    subroutine run_dgemm(self, blas_name)
         class(DGEMMBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
-        integer, intent(in) :: iunit
 
-        integer :: i
+        integer :: i, iunit
         real(real64) :: avg_gflops
+
+        self%name = "DGEMM"
+
+        call self%open_results_file(iunit)
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 4, 10
-            self%m = 2**i
-            self%n = 2**i
-            self%k = 2**i
+        self%min_exp = 4
+        self%max_exp = 10
+        self%base = 2
+
+        do i = self%min_exp, self%max_exp
+            self%m = self%base**i
+            self%n = self%base**i
+            self%k = self%base**i
 
             allocate(self%A(self%m , self%n))
             allocate(self%B(self%n , self%k))
@@ -91,22 +82,32 @@ contains
         end do
 
         write(iunit, '(A)') ''
+
+        close(iunit)
+
     end subroutine run_dgemm
 
-    subroutine run_sgemm(self, blas_name, iunit)
+    subroutine run_sgemm(self, blas_name)
         class(SGEMMBenchmark), intent(inout) :: self
         character(len=16), intent(in) :: blas_name
-        integer, intent(in) :: iunit
-
-        integer :: i
+        
+        integer :: i, iunit
         real(real64) :: avg_gflops
+
+        self%name = "SGEMM"
+
+        call self%open_results_file(iunit)
 
         write(iunit, '(2A)', advance='no') blas_name, ','
 
-        do i = 4, 10
-            self%m = 2**i
-            self%n = 2**i
-            self%k = 2**i
+        self%min_exp = 4
+        self%max_exp = 10
+        self%base = 2
+
+        do i = self%min_exp, self%max_exp
+            self%m = self%base**i
+            self%n = self%base**i
+            self%k = self%base**i
 
             allocate(self%A(self%m , self%n))
             allocate(self%B(self%n , self%k))
@@ -128,6 +129,9 @@ contains
         end do
 
         write(iunit, '(A)') ''
+        
+        close(iunit)
+
     end subroutine run_sgemm
 
     subroutine call_dgemm(self)
@@ -167,36 +171,4 @@ contains
             self%n&
         )
     end subroutine call_sgemm
-
-    subroutine dgemm_headers(iunit)
-        integer, intent(in) :: iunit
-        integer :: i
-
-        write(iunit, '(A)') 'Average performance of DGEMM (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') 'BLAS backend,'
-
-        do i = 4, 10
-            write(iunit, '(I6,A)', advance='no') 2**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-    end subroutine dgemm_headers
-
-    subroutine sgemm_headers(iunit)
-        integer, intent(in) :: iunit
-        integer :: i
-
-        write(iunit, '(A)') 'Average performance of SGEMM (GFLOPS/s)'
-        write(iunit, '(A)') ',Matrix size,'
-        write(iunit, '(A)', advance='no') 'BLAS backend,'
-
-        do i = 4, 10
-            write(iunit, '(I6,A)', advance='no') 2**i, ','
-        end do
-
-        write(iunit, '(A)') ''
-    end subroutine sgemm_headers
-
-
 end module blas_l3_benchmarks
