@@ -45,6 +45,14 @@ contains
         integer :: i, iunit
         real(real64) :: avg_gflops
 
+        integer(kind=c_int) :: p_grid, q_grid, mpi_size, ierr
+
+        !Block size
+        integer(int64) :: nb = 256
+
+        call MPI_Comm_size( MPI_COMM_WORLD, mpi_size, ierr )
+        call grid_size( mpi_size, p_grid, q_grid ) 
+
         self%name = "SLATE_MULT_D"
 
         call self%open_results_file(iunit)
@@ -89,6 +97,14 @@ contains
         
         integer :: i, iunit
         real(real64) :: avg_gflops
+
+        integer(kind=c_int) :: p_grid, q_grid, mpi_size, ierr
+
+        !Block size
+        integer(int64) :: nb = 256
+
+        call MPI_Comm_size( MPI_COMM_WORLD, mpi_size, ierr )
+        call grid_size( mpi_size, p_grid, q_grid ) 
 
         self%name = "SLATE_MULT_S"
 
