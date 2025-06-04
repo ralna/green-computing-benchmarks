@@ -49,13 +49,13 @@ contains
 
         self%name = "DASUM"
 
-        call self%open_results_file(iunit)
-
-        write(iunit, '(2A)', advance='no') blas_name, ','
 
         self%min_exp = 3
         self%max_exp = 16
         self%base = 2
+
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = self%min_exp, self%max_exp
             self%n = self%base**i
@@ -86,13 +86,12 @@ contains
 
         self%name = "DAXPY"
 
-        call self%open_results_file(iunit)
-
-        write(iunit, '(2A)', advance='no') blas_name, ','
-
         self%min_exp = 3
         self%max_exp = 16
         self%base = 2
+
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = self%min_exp, self%max_exp
             self%n = self%base**i
@@ -127,13 +126,12 @@ contains
 
         self%name = "SASUM"
 
-        call self%open_results_file(iunit)
-
-        write(iunit, '(2A)', advance='no') blas_name, ','
-
         self%min_exp = 3
         self%max_exp = 16
         self%base = 2
+
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = self%min_exp, self%max_exp
             self%n = self%base**i

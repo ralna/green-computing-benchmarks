@@ -33,13 +33,12 @@ contains
 
         self%name = "DGESV"
 
-        call self%open_results_file(iunit)
-
-        write(iunit, '(2A)', advance='no') blas_name, ','
-
         self%min_exp = 1
         self%max_exp = 3
         self%base = 10
+
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = self%min_exp, self%max_exp
             self%n = self%base**i

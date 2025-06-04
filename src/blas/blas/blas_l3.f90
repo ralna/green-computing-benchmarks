@@ -79,13 +79,12 @@ contains
 
         self%name = "DGEMM"
 
-        call self%open_results_file(iunit)
-
-        write(iunit, '(2A)', advance='no') blas_name, ','
-
         self%min_exp = 4
         self%max_exp = 10
         self%base = 2
+
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = self%min_exp, self%max_exp
             self%m = self%base**i
@@ -126,13 +125,12 @@ contains
 
         self%name = "SGEMM"
 
-        call self%open_results_file(iunit)
-
-        write(iunit, '(2A)', advance='no') blas_name, ','
-
         self%min_exp = 4
         self%max_exp = 10
         self%base = 2
+
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = self%min_exp, self%max_exp
             self%m = self%base**i
@@ -173,13 +171,12 @@ contains
 
         self%name = "DSYRK"
 
-        call self%open_results_file(iunit)
-
-        write(iunit, '(2A)', advance='no') blas_name, ','
-
         self%min_exp = 4
         self%max_exp = 10
         self%base = 2
+        
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = self%min_exp, self%max_exp
             self%n = self%base**i
@@ -216,13 +213,12 @@ contains
 
         self%name = "SSYRK"
 
-        call self%open_results_file(iunit)
-
-        write(iunit, '(2A)', advance='no') blas_name, ','
-
         self%min_exp = 4
         self%max_exp = 10
         self%base = 2
+
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
 
         do i = self%min_exp, self%max_exp
             self%n = self%base**i
