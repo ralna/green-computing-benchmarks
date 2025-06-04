@@ -55,7 +55,7 @@ contains
 
         self%name = "SLATE_MULT_D"
 
-        self%min_exp = 10
+        self%min_exp = 4
         self%max_exp = 15
         self%base = 2
                 
@@ -108,7 +108,7 @@ contains
 
         self%name = "SLATE_MULT_S"
 
-        self%min_exp = 10
+        self%min_exp = 4
         self%max_exp = 15
         self%base = 2
 

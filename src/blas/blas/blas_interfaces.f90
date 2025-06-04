@@ -1,7 +1,7 @@
 module blas_interfaces
     implicit none (external)
     private
-    public dgemm, sgemm, dgemv, dasum, sasum, sgemv, daxpy, dsyrk, ssyrk
+    public dgemm, sgemm, dgemv, dasum, sasum, sgemv, daxpy, dsyrk, ssyrk, dsyr2k, ssyr2k
 
     interface
         subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
@@ -49,6 +49,28 @@ module blas_interfaces
             real, intent(in) :: a(lda, k)
             real, intent(inout) :: c(ldc, n)
         end subroutine ssyrk
+
+        subroutine dsyr2k(uplo, trans, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
+            use iso_fortran_env, only: int64
+            implicit none (external)
+
+            character(len=*), intent(in) :: uplo, trans
+            integer(int64), intent(in) :: n, k, lda, ldb, ldc
+            double precision, intent(in) :: alpha, beta
+            double precision, intent(in) :: a(lda, k), b(lda, k)
+            double precision, intent(inout) :: c(ldc, n)
+        end subroutine dsyr2k
+
+        subroutine ssyr2k(uplo, trans, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
+            use iso_fortran_env, only: int64
+            implicit none (external)
+
+            character(len=*), intent(in) :: uplo, trans
+            integer(int64), intent(in) :: n, k, lda, ldb, ldc
+            real, intent(in) :: alpha, beta
+            real, intent(in) :: a(lda, k), b(lda, k)
+            real, intent(inout) :: c(ldc, n)
+        end subroutine ssyr2k
 
         subroutine dgemv(trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
             use iso_fortran_env, only: int64

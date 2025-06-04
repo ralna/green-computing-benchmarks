@@ -33,9 +33,9 @@ contains
 
         self%name = "DGESV"
 
-        self%min_exp = 1
-        self%max_exp = 3
-        self%base = 10
+        self%min_exp = 4
+        self%max_exp = 15
+        self%base = 2
 
         call self%open_results_file(iunit)
         write(iunit, '(2A)', advance='no') blas_name, ','

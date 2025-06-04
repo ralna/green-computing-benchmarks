@@ -1,6 +1,6 @@
 module blas_l3_benchmarks
     use benchmark_base, only: Benchmark
-    use blas_interfaces, only: dgemm, sgemm, dsyrk, ssyrk
+    use blas_interfaces, only: dgemm, sgemm, dsyrk, ssyrk, dsyr2k, ssyr2k
     use iso_fortran_env, only: int64, real64
     implicit none (external)
     private
@@ -69,6 +69,38 @@ module blas_l3_benchmarks
             procedure :: call_benchmark => call_ssyrk
     end type SSYRKBenchmark 
 
+    type, public, extends(Benchmark) :: DSYR2KBenchmark
+        integer(int64) :: n
+        integer(int64) :: k
+
+        double precision :: alpha = 1.0
+        double precision :: beta = 0.0
+
+        double precision, dimension(:,:), allocatable :: A
+        double precision, dimension(:,:), allocatable :: B
+        double precision, dimension(:,:), allocatable :: C
+
+        contains
+            procedure :: run => run_dsyr2k
+            procedure :: call_benchmark => call_dsyr2k
+    end type DSYR2KBenchmark 
+
+    type, public, extends(Benchmark) :: SSYR2KBenchmark
+        integer(int64) :: n
+        integer(int64) :: k
+
+        real :: alpha = 1.0
+        real :: beta = 0.0
+
+        real, dimension(:,:), allocatable :: A
+        real, dimension(:,:), allocatable :: B
+        real, dimension(:,:), allocatable :: C
+
+        contains
+            procedure :: run => run_ssyr2k
+            procedure :: call_benchmark => call_ssyr2k
+    end type SSYR2KBenchmark
+
 contains
     subroutine run_dgemm(self, blas_name)
         class(DGEMMBenchmark), intent(inout) :: self
@@ -80,7 +112,7 @@ contains
         self%name = "DGEMM"
 
         self%min_exp = 4
-        self%max_exp = 10
+        self%max_exp = 15
         self%base = 2
 
         call self%open_results_file(iunit)
@@ -126,7 +158,7 @@ contains
         self%name = "SGEMM"
 
         self%min_exp = 4
-        self%max_exp = 10
+        self%max_exp = 15
         self%base = 2
 
         call self%open_results_file(iunit)
@@ -172,7 +204,7 @@ contains
         self%name = "DSYRK"
 
         self%min_exp = 4
-        self%max_exp = 10
+        self%max_exp = 15
         self%base = 2
         
         call self%open_results_file(iunit)
@@ -214,7 +246,7 @@ contains
         self%name = "SSYRK"
 
         self%min_exp = 4
-        self%max_exp = 10
+        self%max_exp = 15
         self%base = 2
 
         call self%open_results_file(iunit)
@@ -245,6 +277,96 @@ contains
         close(iunit)
 
     end subroutine run_ssyrk
+
+    subroutine run_dsyr2k(self, blas_name)
+        class(DSYR2KBenchmark), intent(inout) :: self
+        character(len=16), intent(in) :: blas_name
+        
+        integer :: i, iunit
+        real(real64) :: avg_gflops
+
+        self%name = "DSYR2K"
+
+        self%min_exp = 4
+        self%max_exp = 15
+        self%base = 2
+        
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
+
+        do i = self%min_exp, self%max_exp
+            self%n = self%base**i
+            self%k = self%base**i
+
+            allocate(self%A(self%n , self%k))
+            allocate(self%B(self%n , self%k))
+            allocate(self%C(self%n , self%n))
+
+            call random_number(self%A)
+            call random_number(self%B)
+            call random_number(self%C)
+
+            self%num_flops = self%n * self%n * self%k
+
+            avg_gflops = self%time_benchmark(100)
+
+            write(iunit, '(F11.7,A)', advance='no') avg_gflops, ','
+
+            deallocate(self%A)
+            deallocate(self%B)
+            deallocate(self%C)
+        end do
+
+        write(iunit, '(A)') ''
+        
+        close(iunit)
+
+    end subroutine run_dsyr2k
+
+    subroutine run_ssyr2k(self, blas_name)
+        class(SSYR2KBenchmark), intent(inout) :: self
+        character(len=16), intent(in) :: blas_name
+        
+        integer :: i, iunit
+        real(real64) :: avg_gflops
+
+        self%name = "SSYR2K"
+
+        self%min_exp = 4
+        self%max_exp = 15
+        self%base = 2
+
+        call self%open_results_file(iunit)
+        write(iunit, '(2A)', advance='no') blas_name, ','
+
+        do i = self%min_exp, self%max_exp
+            self%n = self%base**i
+            self%k = self%base**i
+
+            allocate(self%A(self%n , self%k))
+            allocate(self%B(self%n , self%k))
+            allocate(self%C(self%n , self%n))
+
+            call random_number(self%A)
+            call random_number(self%B)
+            call random_number(self%C)
+
+            self%num_flops = self%n * self%n * self%k
+
+            avg_gflops = self%time_benchmark(100)
+
+            write(iunit, '(F11.7,A)', advance='no') avg_gflops, ','
+
+            deallocate(self%A)
+            deallocate(self%B)
+            deallocate(self%C)
+        end do
+
+        write(iunit, '(A)') ''
+        
+        close(iunit)
+
+    end subroutine run_ssyr2k
 
     subroutine call_dgemm(self)
         class(DGEMMBenchmark), intent(inout) :: self
@@ -315,4 +437,40 @@ contains
             self%n&
         )
     end subroutine call_ssyrk
+
+    subroutine call_dsyr2k(self)
+        class(DSYR2KBenchmark), intent(inout) :: self
+        call dsyr2k(&
+            "U",&
+            "N",&
+            self%n,&
+            self%k,&
+            self%alpha,&
+            self%A,&
+            self%n,&
+            self%B,&
+            self%n,&
+            self%beta,&
+            self%C,&
+            self%n&
+        )
+    end subroutine call_dsyr2k
+
+    subroutine call_ssyr2k(self)
+        class(SSYR2KBenchmark), intent(inout) :: self
+        call ssyr2k(&
+            "U",&
+            "N",&
+            self%n,&
+            self%k,&
+            self%alpha,&
+            self%A,&
+            self%n,&
+            self%B,&
+            self%n,&
+            self%beta,&
+            self%C,&
+            self%n&
+        )
+    end subroutine call_ssyr2k
 end module blas_l3_benchmarks

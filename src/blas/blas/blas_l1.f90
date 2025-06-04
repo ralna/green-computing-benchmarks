@@ -50,8 +50,8 @@ contains
         self%name = "DASUM"
 
 
-        self%min_exp = 3
-        self%max_exp = 16
+        self%min_exp = 4
+        self%max_exp = 15
         self%base = 2
 
         call self%open_results_file(iunit)
@@ -86,8 +86,8 @@ contains
 
         self%name = "DAXPY"
 
-        self%min_exp = 3
-        self%max_exp = 16
+        self%min_exp = 4
+        self%max_exp = 15
         self%base = 2
 
         call self%open_results_file(iunit)
@@ -126,8 +126,8 @@ contains
 
         self%name = "SASUM"
 
-        self%min_exp = 3
-        self%max_exp = 16
+        self%min_exp = 4
+        self%max_exp = 15
         self%base = 2
 
         call self%open_results_file(iunit)
