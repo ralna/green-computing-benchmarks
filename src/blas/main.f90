@@ -2,7 +2,7 @@ program main
     use benchmark_base, only: Benchmark, BenchmarkContainer
     use blas_l1_benchmarks, only: DASUMBenchmark, SASUMBenchmark, DAXPYBenchmark
     use blas_l2_benchmarks, only: DGEMVBenchmark, SGEMVBenchmark
-    use blas_l3_benchmarks, only: DGEMMBenchmark, SGEMMBenchmark
+    use blas_l3_benchmarks, only: DGEMMBenchmark, SGEMMBenchmark, DSYRKBenchmark, SSYRKBenchmark
     use lapack_linsolve_benchmarks, only: DGESVBenchmark
     use iso_fortran_env, only: real64, int64
 
@@ -19,7 +19,7 @@ program main
     integer :: iunit
     logical :: file_exists
 
-    allocate(benchmark_array(7))
+    allocate(benchmark_array(9))
     allocate(DGEMMBenchmark::benchmark_array(1)%b)
     allocate(DGEMVBenchmark::benchmark_array(2)%b)
     allocate(SGEMVBenchmark::benchmark_array(3)%b)
@@ -27,6 +27,8 @@ program main
     allocate(SASUMBenchmark::benchmark_array(5)%b)
     allocate(DGESVBenchmark::benchmark_array(6)%b)
     allocate(DAXPYBenchmark::benchmark_array(7)%b)
+    allocate(DSYRKBenchmark::benchmark_array(8)%b)
+    allocate(SSYRKBenchmark::benchmark_array(9)%b)
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
