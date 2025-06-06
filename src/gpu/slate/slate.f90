@@ -56,7 +56,7 @@ contains
         self%name = "SLATE_MULT_D"
 
         self%min_exp = 4
-        self%max_exp = 15
+        self%max_exp = 14
         self%base = 2
                 
         call self%open_results_file(iunit)
@@ -109,7 +109,7 @@ contains
         self%name = "SLATE_MULT_S"
 
         self%min_exp = 4
-        self%max_exp = 15
+        self%max_exp = 14
         self%base = 2
 
         write(iunit, '(2A)', advance='no') blas_name, ','

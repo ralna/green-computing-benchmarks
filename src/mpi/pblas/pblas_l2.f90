@@ -56,7 +56,7 @@ contains
         csrc=0
 
         self%min_exp = 4
-        self%max_exp = 15
+        self%max_exp = 14
         self%base = 2
 
         if ((myrow == 0) .and. (mycol == 0)) then
