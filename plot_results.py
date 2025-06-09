@@ -16,13 +16,14 @@ for c in csv_files:
             gflops = {int(k.strip()): float(v.strip()) for k, v in row.items() if k != "BLAS backend" and k != ""}
         
             ax.semilogx(gflops.keys(), gflops.values(), label=blas_backend)
-            ax.legend()
         
     ax.set_xticks(list(gflops.keys()))
     ax.set_xticklabels(gflops.keys())
     
     ax.set_xlabel("Problem size")
     ax.set_ylabel("GFLOP/s")
+    ax.legend()
+    ax.grid()    
             
     plt.savefig(c.split(".")[0] + ".png")
     plt.clf()
