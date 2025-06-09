@@ -34,7 +34,7 @@ contains
         self%name = "DGESV"
 
         self%min_exp = 4
-        self%max_exp = 14
+        self%max_exp = 16
         self%base = 2
 
         call self%open_results_file(iunit)
