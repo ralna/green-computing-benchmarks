@@ -13,6 +13,14 @@ meson setup builddir --optimization=3
 meson compile -C builddir
 ```
 
+Optionally, GPU and MPI enabled benchmarks can be built by running
+```
+meson setup builddir --optimization=3 -Dgpu=true -Dmpi=true
+meson compile -C builddir
+```
+
+The MPI benchmarks require SCALAPACK to be installed, and the GPU benchmarks require [SLATE](https://github.com/icl-utk-edu/slate/tree/master).
+
 ## Running
 
 To run the benchmarks, run the `green_computing_benchmark` executable in `builddir`. By default this will write the results to `results.csv`. An alternative filename can be supplied as an additional command line argument.

@@ -17,6 +17,9 @@ deps = []
 
 fc = meson.get_compiler('fortran')
 
+build_gpu = get_option('gpu')
+build_mpi = get_option('mpi')
+
 ###################
 # Define sources  #
 ###################
@@ -51,27 +54,32 @@ executable(
   link_with: benchmark_base
 )
 
-scalapack_dep = dependency('scalapack')
-deps += scalapack_dep
+if build_mpi
+  scalapack_dep = dependency('scalapack')
+  deps += scalapack_dep
+  
+  mpi_dep = dependency('mpi')
+  deps += mpi_dep
 
-mpi_dep = dependency('mpi')
-deps += mpi_dep
+  executable(
+    'benchmark_mpi', mpi_src,
+    dependencies: deps,
+    link_language : 'fortran',
+    install : true,
+    link_with: benchmark_base
+  )
+endif
 
-executable(
-  'benchmark_mpi', mpi_src,
-  dependencies: deps,
-  link_language : 'fortran',
-  install : true,
-  link_with: benchmark_base
-)
+if build_gpu
+  slate_dep = dependency('slate')
+  deps += slate_dep
+  
+  executable(
+    'benchmark_gpu', gpu_src,
+    dependencies: deps,
+    link_language : 'fortran',
+    install : true,
+    link_with: benchmark_base
+  )
+endif
 
-slate_dep = dependency('slate')
-deps += slate_dep
-
-executable(
-  'benchmark_gpu', gpu_src,
-  dependencies: deps,
-  link_language : 'fortran',
-  install : true,
-  link_with: benchmark_base
-)
