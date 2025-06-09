@@ -6,5 +6,4 @@ for B in ${BLAS_BACKENDS[@]};
 do
     export FLEXIBLAS=$B
     ./build/benchmark_blas "${B}"
-    mpirun -np 4 ./build/benchmark_mpi "${B}"
 done
