@@ -19,18 +19,19 @@ program main
     integer :: iunit
     logical :: file_exists
 
-    allocate(benchmark_array(11))
+    allocate(benchmark_array(12))
     allocate(DGEMMBenchmark::benchmark_array(1)%b)
-    allocate(DGEMVBenchmark::benchmark_array(2)%b)
-    allocate(SGEMVBenchmark::benchmark_array(3)%b)
-    allocate(DASUMBenchmark::benchmark_array(4)%b)
-    allocate(SASUMBenchmark::benchmark_array(5)%b)
-    allocate(DGESVBenchmark::benchmark_array(6)%b)
-    allocate(DAXPYBenchmark::benchmark_array(7)%b)
-    allocate(DSYRKBenchmark::benchmark_array(8)%b)
-    allocate(SSYRKBenchmark::benchmark_array(9)%b)
-    allocate(DSYR2KBenchmark::benchmark_array(10)%b)
-    allocate(SSYR2KBenchmark::benchmark_array(11)%b)
+    allocate(SGEMMBenchmark::benchmark_array(2)%b)
+    allocate(DGEMVBenchmark::benchmark_array(3)%b)
+    allocate(SGEMVBenchmark::benchmark_array(4)%b)
+    allocate(DASUMBenchmark::benchmark_array(5)%b)
+    allocate(SASUMBenchmark::benchmark_array(6)%b)
+    allocate(DGESVBenchmark::benchmark_array(7)%b)
+    allocate(DAXPYBenchmark::benchmark_array(8)%b)
+    allocate(DSYRKBenchmark::benchmark_array(9)%b)
+    allocate(SSYRKBenchmark::benchmark_array(10)%b)
+    allocate(DSYR2KBenchmark::benchmark_array(11)%b)
+    allocate(SSYR2KBenchmark::benchmark_array(12)%b)
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
