@@ -92,8 +92,6 @@ module benchmark_base
             open(newunit=iunit, file=filename, position="append")
     
             if (.not. file_exists) then
-                write(iunit, '(3A)') 'Average performance of ', self%name, '(GFLOPS/s)'
-                write(iunit, '(A)') ',Problem size,'
                 write(iunit, '(A)', advance='no') 'BLAS backend,'
     
                 do i = self%min_exp, self%max_exp
