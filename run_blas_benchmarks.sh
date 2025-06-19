@@ -1,4 +1,5 @@
 BLAS_BACKENDS=$(flexiblas list -p | cut -d '|' -f 2)
+export OMP_NUM_THREADS=1
 
 rm results_*.csv
 
