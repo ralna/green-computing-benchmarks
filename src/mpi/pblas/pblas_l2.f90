@@ -91,7 +91,7 @@ contains
             avg_gflops = self%time_benchmark(100)
 
             if (myrow == 0 .and. mycol == 0) then
-                write(iunit, '(F11.7,A)', advance='no') avg_gflops, ','
+                write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
             end if
 
             deallocate(self%la)

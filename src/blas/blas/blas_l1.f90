@@ -68,7 +68,7 @@ contains
 
             avg_gflops = self%time_benchmark(100)
 
-            write(iunit, '(F11.7,A)', advance='no') avg_gflops, ','
+            write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
 
             deallocate(self%x)
         end do
@@ -106,7 +106,7 @@ contains
 
             avg_gflops = self%time_benchmark(100)
 
-            write(iunit, '(F11.7,A)', advance='no') avg_gflops, ','
+            write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
 
             deallocate(self%x)
             deallocate(self%y)
@@ -144,7 +144,7 @@ contains
 
             avg_gflops = self%time_benchmark(100)
 
-            write(iunit, '(F11.7,A)', advance='no') avg_gflops, ','
+            write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
 
             deallocate(self%x)
         end do
