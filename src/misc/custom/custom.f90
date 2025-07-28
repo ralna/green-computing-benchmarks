@@ -31,7 +31,7 @@ contains
         self%name = "NAIVE_MATMUL"
 
         self%min_exp = 4
-        self%max_exp = 14
+        self%max_exp = 10
         self%base = 2
 
         call self%open_results_file(iunit)

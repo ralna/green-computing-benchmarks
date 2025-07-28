@@ -17,7 +17,7 @@ program main
     logical :: file_exists
 
     allocate(benchmark_array(1))
-    allocate(NaiveMatmulBenchmark::benchmark_array(6)%b)
+    allocate(NaiveMatmulBenchmark::benchmark_array(1)%b)
 
     do i = 1, size(benchmark_array)
         b = benchmark_array(i)%b
