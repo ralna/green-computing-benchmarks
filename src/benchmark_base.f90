@@ -44,7 +44,7 @@ module benchmark_base
             return
         end function get_filename
 
-        function time_benchmark(self, n_iters) result(avg_gflops)
+        function time_benchmark(self, n_iters) result(max_flops)
             class(Benchmark), intent(inout) :: self
             integer, intent(in) :: n_iters
 
@@ -53,12 +53,11 @@ module benchmark_base
 
             real(real64) :: elapsed_time
 
-            real(real64) :: sum_flops, flops, avg_gflops
+            real(real64) :: max_flops, flops
 
             integer :: i
 
-            sum_flops = 0
-
+            max_flops = 0
             do i = 1, n_iters
                 call system_clock(start_count, count_rate, count_max)
                 call self%call_benchmark()
@@ -70,11 +69,11 @@ module benchmark_base
                 !FLOPS/s
                 flops = real(self%num_flops) / (elapsed_time)
 
-                sum_flops = sum_flops + flops
+                max_flops = max(max_flops, flops)
 
             end do
 
-            avg_gflops = sum_flops / (1000.0**3 * n_iters)
+            max_flops = max_flops / (1000.0**3)
             return
         end function time_benchmark
 
