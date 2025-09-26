@@ -29,6 +29,15 @@ subdir('src/mpi')
 subdir('src/gpu')
 subdir('src/misc')
 
+tomlf_dep = dependency(
+  'toml-f',
+  version: '>=0.2.0',
+  fallback: ['toml-f', 'tomlf_dep'],
+  default_options: ['default_library=static'],
+)
+
+deps += tomlf_dep
+
 ###################
 # Build library   #
 ###################
