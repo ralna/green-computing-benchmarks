@@ -1,0 +1,24 @@
+num_repeats = 100
+
+[[benchmarks]]
+name = "GEMM"
+initialisation = "Random"
+precisions = [32, 64]
+
+
+[benchmarks.sizes]
+m = [2, 4, 8, 16, 1021]
+n = [2, 4, 8, 16, 1021]
+k = [2, 4, 8, 16, 1021]
+combination = "Pair"
+
+
+[[benchmarks]]
+name = "GEMV"
+initialisation = "Random"
+precisions = [32, 64]
+
+[benchmarks.sizes]
+m = [10, 100, 1000]
+n = [10, 100, 1000]
+combination = "Product"
