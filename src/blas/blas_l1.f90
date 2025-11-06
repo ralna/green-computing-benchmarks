@@ -1,5 +1,5 @@
 module blas_l1_benchmarks
-    use benchmark_base, only: Benchmark
+    use benchmark_types, only: Benchmark
     use blas_interfaces, only: dasum, sasum, daxpy
     use iso_fortran_env, only: int64, real64
     implicit none (external)

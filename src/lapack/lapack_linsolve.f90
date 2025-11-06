@@ -1,5 +1,5 @@
 module lapack_linsolve_benchmarks
-    use benchmark_base, only: Benchmark
+    use benchmark_types, only: Benchmark
     use lapack_interfaces, only: dgesv
     use iso_fortran_env, only: int64, real64
     implicit none (external)
