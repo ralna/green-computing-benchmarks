@@ -170,8 +170,10 @@ contains
 
             write(iunit, '(A)', advance='no') 'n,'
 
-            do i = 1, size(self%n_sizes)
-               write(iunit, '(I6,A)', advance='no') self%n_sizes(i), ','
+            do j = 1, 3
+               do i = 1, size(self%n_sizes)
+                  write(iunit, '(I6,A)', advance='no') self%n_sizes(i), ','
+               end do
             end do
             write(iunit, '(A)') ''
 

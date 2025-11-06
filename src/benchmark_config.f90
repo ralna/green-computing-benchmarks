@@ -2,6 +2,8 @@ module benchmark_config
    use iso_fortran_env, only: int64, real64
    use misc_benchmarks, only: DummyBenchmark
    use blas_l3_benchmarks, only: DGEMMBenchmark
+   use blas_l2_benchmarks, only: DGEMVBenchmark
+   use blas_l1_benchmarks, only: DAXPYBenchmark
    use benchmark_types, only: Benchmark, BenchmarkContainer, L1Benchmark, L2Benchmark, L3Benchmark
    use tomlf, only : toml_table, toml_array, toml_parse, toml_error, get_value, len
    implicit none (external)
@@ -124,6 +126,15 @@ contains
        case ("DGEMM")
          allocate(DGEMMBenchmark::benchmark%b)
          benchmark%b = DGEMMBenchmark(name="DGEMM")
+
+       case ("DGEMV")
+         allocate(DGEMVBenchmark::benchmark%b)
+         benchmark%b = DGEMVBenchmark(name="DGEMV")
+
+       case ("DAXPY")
+         allocate(DAXPYBenchmark::benchmark%b)
+         benchmark%b = DAXPYBenchmark(name="DAXPY")
+   
        case default
          allocate(DummyBenchmark::benchmark%b)
          benchmark%b = DummyBenchmark(name="failed")
