@@ -245,7 +245,7 @@ contains
 
             allocate(self%A(self%m , self%n))
             allocate(self%x(self%n))
-            allocate(self%y(self%n))
+            allocate(self%y(self%m))
 
             call random_number(self%A)
             call random_number(self%x)
@@ -273,7 +273,6 @@ contains
 
       integer :: i, iunit
       real(real64) :: avg_gflops
-
 
       call self%open_results_file(iunit)
       write(iunit, '(2A)', advance='no') blas_name, ','

@@ -80,7 +80,7 @@ module blas_interfaces
             integer(int64), intent(in) :: m, n, lda
             integer, intent(in) :: incx, incy
             double precision, intent(in) :: alpha, beta
-            double precision, intent(in) :: a(lda, m)
+            double precision, intent(in) :: a(lda, n)
             double precision, intent(in) :: x(n)
             double precision, intent(inout) :: y(m)
         end subroutine dgemv
