@@ -3,8 +3,8 @@ num_repeats = 100
 [[benchmarks]]
 name = "DGEMM"
 m-sizes = [10, 20, 30]
-n-sizes = [10, 20, 30]
-k-sizes = [10, 20, 30]
+n-sizes = [10, 50, 30]
+k-sizes = [10, 50, 30]
 
 [[benchmarks]]
 name = "DGEMV"

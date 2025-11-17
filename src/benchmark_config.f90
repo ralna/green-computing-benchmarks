@@ -76,45 +76,43 @@ contains
 
       !check for m n and k
       call get_value(benchmark_table, "m-sizes", toml_arr)
+      call get_value(toml_arr, m_sizes)
+      benchmark%b%m_sizes = m_sizes
+
 
       !Always need m
-      if ( associated(toml_arr) ) then
-         call get_value(toml_arr, m_sizes)
-         benchmark%b%m_sizes = m_sizes
-      else
+      if ( size(m_sizes) <= 0 ) then
          print *, "Missing m-sizes in ", name, " config"
          stop 1
       end if
 
-      call get_value(benchmark_table, "n-sizes", toml_arr)
-      if ( associated(toml_arr) ) then
-         select type(b => benchmark%b)
-          class is (L3Benchmark)
-            call get_value(toml_arr, n_sizes)
-            benchmark%b%n_sizes = n_sizes
+      select type(b => benchmark%b)
+       class is (L3Benchmark)
+         call get_value(benchmark_table, "n-sizes", toml_arr)
+         call get_value(toml_arr, n_sizes)
+         benchmark%b%n_sizes = n_sizes
 
-          class is (L2Benchmark)
-            call get_value(toml_arr, n_sizes)
-            benchmark%b%n_sizes = n_sizes
+         call get_value(benchmark_table, "k-sizes", toml_arr)
+         call get_value(toml_arr, k_sizes)
+         benchmark%b%k_sizes = k_sizes
 
-         end select
-      else
-         print *, "Missing n-sizes in ", name, " config"
-         stop 1
-      end if
+         if ( size(n_sizes) <= 0 ) then
+            print *, "Missing n-sizes in ", name, " config"
+            stop 1
+         else if ( size(k_sizes) <= 0 ) then
+            print *, "Missing k-sizes in ", name, " config"
+            stop 1
+         end if
+       class is (L2Benchmark)
+         call get_value(benchmark_table, "n-sizes", toml_arr)
+         call get_value(toml_arr, n_sizes)
+         benchmark%b%n_sizes = n_sizes
 
-      call get_value(benchmark_table, "k-sizes", toml_arr)
-      if ( associated(toml_arr) ) then
-         select type(b => benchmark%b)
-          class is (L3Benchmark)
-            call get_value(toml_arr, k_sizes)
-            benchmark%b%k_sizes = k_sizes
-
-         end select
-      else
-         print *, "Missing k-sizes in ", name, " config"
-         stop 1
-      end if
+         if ( size(n_sizes) <= 0 ) then
+            print *, "Missing n-sizes in ", name, " config"
+            stop 1
+         end if
+      end select
    end subroutine init_benchmark
 
    subroutine select_benchmark(name, benchmark)
