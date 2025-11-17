@@ -18,7 +18,7 @@ program main
 
     do i = 1, size(benchmark_array)
         call get_environment_variable("FLEXIBLAS", blas_name)
-
+        
         call benchmark_array(i)%b%run(blas_name)
     end do
 

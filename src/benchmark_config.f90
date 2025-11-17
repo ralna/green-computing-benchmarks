@@ -1,6 +1,6 @@
 module benchmark_config
    use iso_fortran_env, only: int64, real64
-   use misc_benchmarks, only: DummyBenchmark
+   use misc_benchmarks, only: DummyBenchmark, NaiveMatmulBenchmark
    use blas_l3_benchmarks, only: DGEMMBenchmark
    use blas_l2_benchmarks, only: DGEMVBenchmark
    use blas_l1_benchmarks, only: DAXPYBenchmark
@@ -60,7 +60,6 @@ contains
 
       !Get name
       call get_value(benchmark_table, "name", name)
-      print *, name
 
       !Create benchmark of correct derived type
       call select_benchmark(name, benchmark)
@@ -134,7 +133,11 @@ contains
        case ("DAXPY")
          allocate(DAXPYBenchmark::benchmark%b)
          benchmark%b = DAXPYBenchmark(name="DAXPY")
-   
+
+       case ("NAIVE")
+         allocate(NaiveMatmulBenchmark::benchmark%b)
+         benchmark%b = NaiveMatmulBenchmark(name="Naive")
+
        case default
          allocate(DummyBenchmark::benchmark%b)
          benchmark%b = DummyBenchmark(name="failed")
