@@ -29,12 +29,13 @@ Where "NAME" corresponds to the function you wish to benchmark. The list of avai
 Benchmarks will be run on the products of these arrays, for example the config above will run on 27 different sized problems.
 Level 3 routines need m, n and k sizes to be specified, level 2 need m and n, and level 1 needs only m. Extra arrays in the config will be ignored.  
 
-To run the benchmarks, run the `benchmark_blas` executable in `build`. A separate csv file will be created for each routine. Alternatively, you can run the `run_blas_benchmarks.sh` script, which will run your chosen benchmarks with all BLAS implementations available to FLEXIBLAS.
+To run the benchmarks, run `build/benchmark_blas config.toml`, where `config.toml` is replaced with the path to your own configuration file.
+A separate csv file will be created for each routine. Alternatively, you can run the `run_blas_benchmarks.sh` script, which will run your chosen benchmarks with all BLAS implementations available to FLEXIBLAS.
 
 To manually change the BLAS backend benchmarks are run with, use:
 
 ```
-FLEXIBLAS="YOUR_BLAS" ./build/benchmark_blas
+FLEXIBLAS="YOUR_BLAS" ./build/benchmark_blas config.toml
 ```
 Available BLAS backends are shown with `flexiblas list`.
 

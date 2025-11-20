@@ -5,16 +5,24 @@ program main
 
     implicit none (external)
 
-    integer :: i
-
     class(BenchmarkContainer), allocatable :: benchmark_array(:)
+    !! Array of benchmark types, each of which corresponds to a routine to benchmark
 
-    character(len=64) :: filename
-    character(len=16) :: blas_name
-    integer :: iunit
-    logical :: file_exists
+    character(len=64) :: blas_name
+    !! Name of BLAS backend the benchmarks are being run with
+    character(len=64) :: config_file
+    !! Name of TOML config file
+    integer :: i
+    !! Loop counter
 
-    call read_config(benchmark_array)
+    if ( command_argument_count() == 0 ) then
+        print *, "Please supply a config file to read"
+        stop 1
+    end if
+    
+    call get_command_argument(1, config_file)
+
+    call read_config(config_file, benchmark_array)
 
     do i = 1, size(benchmark_array)
         call get_environment_variable("FLEXIBLAS", blas_name)

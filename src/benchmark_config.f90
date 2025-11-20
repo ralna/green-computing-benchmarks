@@ -12,10 +12,12 @@ module benchmark_config
 
 contains
 
-   subroutine read_config(benchmarks)
+   subroutine read_config(config_file, benchmarks)
       !! Read in a TOML config file, initialise the benchmarks that it
       !! specifies and store them in the supplied array
 
+      character(len=64), intent(in) :: config_file
+      !! Name of TOML config file
       class(BenchmarkContainer), intent(out), allocatable :: benchmarks(:)
       !! Array of benchmark types to be filled
 
@@ -28,13 +30,21 @@ contains
       type(toml_table), pointer :: benchmark_table
       !! Table of an individual benchmark's config
 
+      logical :: file_exists
+      !! Does supplied config exist?
       integer :: in_unit
       !! Unit to read config file from
       integer :: i
       !! Loop counter
 
       !Read file
-      open(file="example.toml", newunit=in_unit)
+      inquire(file=config_file, exist=file_exists)
+
+      if ( .not.(file_exists) ) then
+         print *, "Supplied config file ", trim(config_file), " does not exist"
+         stop 1
+      end if
+      open(file=config_file, newunit=in_unit)
 
       config_table = toml_table()
 
@@ -135,7 +145,7 @@ contains
       character(len=:), allocatable, intent(in) :: name
       !! Benchmark name
       class(BenchmarkContainer), intent(inout) :: benchmark
-      !! Generic container type that will be allocated as a 
+      !! Generic container type that will be allocated as a
       !! derived type specific to a routine
 
       select case (name)
