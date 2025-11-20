@@ -45,9 +45,6 @@ contains
          stop 1
       end if
 
-      !Get global config options
-      call get_value(config_table, "num_repeats", num_repeats)
-
       ! Loop over list of benchmark tables
       call get_value(config_table, "benchmarks", toml_arr)
       allocate(benchmarks(len(toml_arr)))
@@ -55,7 +52,7 @@ contains
       do i = 1, size(benchmarks)
          call get_value(toml_arr, i, benchmark_table)
          ! Set up benchmark object according to config
-         call init_benchmark(cur_benchmark, benchmarks(i))
+         call init_benchmark(benchmark_table, benchmarks(i))
       end do
    end subroutine read_config
 
