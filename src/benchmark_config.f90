@@ -13,24 +13,31 @@ module benchmark_config
 contains
 
    subroutine read_config(benchmarks)
-      integer :: num_repeats
-      integer, allocatable :: sizes(:)
+      !! Read in a TOML config file, initialise the benchmarks that it
+      !! specifies and store them in the supplied array
 
       class(BenchmarkContainer), intent(out), allocatable :: benchmarks(:)
 
-      type(toml_table), allocatable :: table
-      type(toml_array), pointer :: array
+      type(toml_table), allocatable :: config_table
+      !! TOML table of all benchmarks
+      type(toml_array), pointer :: toml_arr
+      !! Array of benchmark config tables
       type(toml_error), allocatable :: error
-      type(toml_table), pointer :: cur_benchmark
+      !! Error type for parsing config file
+      type(toml_table), pointer :: benchmark_table
+      !! Table of an individual benchmark's config
 
-      integer :: in_unit, i
+      integer :: in_unit
+      !! Unit to read config file from
+      integer :: i
+      !! Loop counter
 
       !Read file
       open(file="example.toml", newunit=in_unit)
 
-      table = toml_table()
+      config_table = toml_table()
 
-      call toml_parse(table, in_unit, error)
+      call toml_parse(config_table, in_unit, error)
       close(in_unit)
       if (allocated(error)) then
          print '(a)', "Error: "//error%message
@@ -38,25 +45,33 @@ contains
       end if
 
       !Get global config options
-      call get_value(table, "num_repeats", num_repeats)
+      call get_value(config_table, "num_repeats", num_repeats)
 
       ! Loop over list of benchmark tables
-      call get_value(table, "benchmarks", array)
-      allocate(benchmarks(len(array)))
+      call get_value(config_table, "benchmarks", toml_arr)
+      allocate(benchmarks(len(toml_arr)))
 
       do i = 1, size(benchmarks)
-         call get_value(array, i, cur_benchmark)
+         call get_value(toml_arr, i, benchmark_table)
          ! Set up benchmark object according to config
          call init_benchmark(cur_benchmark, benchmarks(i))
       end do
    end subroutine read_config
 
    subroutine init_benchmark(benchmark_table, benchmark)
+      !! Initialise a benchmark type according to the given TOML config
+
       type(toml_table), intent(inout) :: benchmark_table
-      character(len=:), allocatable :: name, combination
+      !! TOML table containing benchmark parameters
+      character(len=:), allocatable :: name
+      !! Name of the benchmark
       type(toml_array), pointer :: toml_arr
+      !! TOML array to hold size array information
       integer, allocatable :: m_sizes(:), n_sizes(:), k_sizes(:)
+      !! Arrays to specify the size of the benchmark problems
       class(BenchmarkContainer) :: benchmark
+      !! Benchmark type which we will initialise to the type of
+      !! the specified routine
 
       !Get name
       call get_value(benchmark_table, "name", name)
@@ -116,8 +131,14 @@ contains
    end subroutine init_benchmark
 
    subroutine select_benchmark(name, benchmark)
+      !! Match given name to derived type for a routine
+      !! and allocate space for that type
+
       character(len=:), allocatable, intent(in) :: name
+      !! Benchmark name
       class(BenchmarkContainer), intent(inout) :: benchmark
+      !! Generic container type that will be allocated as a 
+      !! derived type specific to a routine
 
       select case (name)
        case ("DGEMM")
