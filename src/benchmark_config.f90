@@ -17,6 +17,7 @@ contains
       !! specifies and store them in the supplied array
 
       class(BenchmarkContainer), intent(out), allocatable :: benchmarks(:)
+      !! Array of benchmark types to be filled
 
       type(toml_table), allocatable :: config_table
       !! TOML table of all benchmarks
