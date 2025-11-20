@@ -204,10 +204,6 @@ contains
                self%n = self%n_sizes(j)
                self%k = self%k_sizes(k)
 
-               print *, "m = ", self%m
-               print *, "n = ", self%n
-               print *, "k = ", self%k
-               print *
                allocate(self%A(self%m , self%k))
                allocate(self%B(self%k , self%n))
                allocate(self%C(self%m , self%n))
