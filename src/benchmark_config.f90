@@ -1,10 +1,10 @@
 module benchmark_config
    use iso_fortran_env, only: int64, real64
    use misc_benchmarks, only: DummyBenchmark, NaiveMatmulBenchmark
-   use blas_l3_benchmarks, only: DGEMMBenchmark
+   use blas_l3_benchmarks, only: DGEMMBenchmark, DSYRKBenchmark, DSYR2KBenchmark
    use blas_l2_benchmarks, only: DGEMVBenchmark
-   use blas_l1_benchmarks, only: DAXPYBenchmark
-   use benchmark_types, only: Benchmark, BenchmarkContainer, L1Benchmark, L2Benchmark, L3Benchmark
+   use blas_l1_benchmarks, only: DAXPYBenchmark, DASUMBenchmark
+   use benchmark_types, only: Benchmark, BenchmarkContainer
    use tomlf, only : toml_table, toml_array, toml_parse, toml_error, get_value, len
    implicit none (external)
    public read_config
@@ -69,14 +69,10 @@ contains
    subroutine init_benchmark(benchmark_table, benchmark)
       !! Initialise a benchmark type according to the given TOML config
 
-      type(toml_table), intent(inout) :: benchmark_table
+      type(toml_table), pointer, intent(inout) :: benchmark_table
       !! TOML table containing benchmark parameters
       character(len=:), allocatable :: name
       !! Name of the benchmark
-      type(toml_array), pointer :: toml_arr
-      !! TOML array to hold size array information
-      integer, allocatable :: m_sizes(:), n_sizes(:), k_sizes(:)
-      !! Arrays to specify the size of the benchmark problems
       class(BenchmarkContainer) :: benchmark
       !! Benchmark type which we will initialise to the type of
       !! the specified routine
@@ -93,49 +89,8 @@ contains
          return
       end select
 
-      !sizes
-      !check that number of size arrays matches function
-      !ignore any extra arrays provided
-
-      !check for m n and k
-      call get_value(benchmark_table, "m-sizes", toml_arr)
-      call get_value(toml_arr, m_sizes)
-      benchmark%b%m_sizes = m_sizes
-
-
-      !Always need m
-      if ( size(m_sizes) <= 0 ) then
-         print *, "Missing m-sizes in ", name, " config"
-         stop 1
-      end if
-
-      select type(b => benchmark%b)
-       class is (L3Benchmark)
-         call get_value(benchmark_table, "n-sizes", toml_arr)
-         call get_value(toml_arr, n_sizes)
-         benchmark%b%n_sizes = n_sizes
-
-         call get_value(benchmark_table, "k-sizes", toml_arr)
-         call get_value(toml_arr, k_sizes)
-         benchmark%b%k_sizes = k_sizes
-
-         if ( size(n_sizes) <= 0 ) then
-            print *, "Missing n-sizes in ", name, " config"
-            stop 1
-         else if ( size(k_sizes) <= 0 ) then
-            print *, "Missing k-sizes in ", name, " config"
-            stop 1
-         end if
-       class is (L2Benchmark)
-         call get_value(benchmark_table, "n-sizes", toml_arr)
-         call get_value(toml_arr, n_sizes)
-         benchmark%b%n_sizes = n_sizes
-
-         if ( size(n_sizes) <= 0 ) then
-            print *, "Missing n-sizes in ", name, " config"
-            stop 1
-         end if
-      end select
+      !Intialize size arrays
+      call benchmark%b%init(benchmark_table)
    end subroutine init_benchmark
 
    subroutine select_benchmark(name, benchmark)
@@ -153,6 +108,14 @@ contains
          allocate(DGEMMBenchmark::benchmark%b)
          benchmark%b = DGEMMBenchmark(name="DGEMM")
 
+         !  case ("DSYRK")
+         !    allocate(DSYRKBenchmark::benchmark%b)
+         !    benchmark%b = DSYRKBenchmark(name="DSYRK")
+
+         !  case ("DSYR2K")
+         !    allocate(DSYR2KBenchmark::benchmark%b)
+         !    benchmark%b = DSYR2KBenchmark(name="DSYR2K")
+
        case ("DGEMV")
          allocate(DGEMVBenchmark::benchmark%b)
          benchmark%b = DGEMVBenchmark(name="DGEMV")
@@ -160,6 +123,18 @@ contains
        case ("DAXPY")
          allocate(DAXPYBenchmark::benchmark%b)
          benchmark%b = DAXPYBenchmark(name="DAXPY")
+
+       case ("DASUM")
+         allocate(DASUMBenchmark::benchmark%b)
+         benchmark%b = DASUMBenchmark(name="DASUM")
+
+       case ("DSYRK")
+         allocate(DSYRKBenchmark::benchmark%b)
+         benchmark%b = DSYRKBenchmark(name="DSYRK")
+
+       case ("DSYR2K")
+         allocate(DSYR2KBenchmark::benchmark%b)
+         benchmark%b = DSYR2KBenchmark(name="DSYR2K")
 
        case ("NAIVE")
          allocate(NaiveMatmulBenchmark::benchmark%b)

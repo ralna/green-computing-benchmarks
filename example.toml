@@ -13,10 +13,24 @@ n-sizes = [10, 20, 30]
 
 [[benchmarks]]
 name = "DAXPY"
-m-sizes = [10, 20, 30]
+n-sizes = [10, 20, 30]
+
+[[benchmarks]]
+name = "DASUM"
+n-sizes = [10, 20, 30]
 
 [[benchmarks]]
 name = "NAIVE"
 m-sizes = [10, 20, 30]
+n-sizes = [10, 20, 30]
+k-sizes = [10, 20, 30]
+
+[[benchmarks]]
+name = "DSYRK"
+n-sizes = [10, 20, 30]
+k-sizes = [10, 20, 30]
+
+[[benchmarks]]
+name = "DSYR2K"
 n-sizes = [10, 20, 30]
 k-sizes = [10, 20, 30]

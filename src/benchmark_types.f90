@@ -1,6 +1,8 @@
 module benchmark_types
    use iso_fortran_env, only: int64, real64
+   use tomlf, only: toml_table, toml_array, get_value
    implicit none (external)
+   public :: write_header
    type, public, abstract :: Benchmark
       integer(int64) :: num_flops = 0.
       character(len=32) :: name
@@ -12,47 +14,11 @@ module benchmark_types
    contains
       procedure(run), deferred :: run
       procedure(call_benchmark), deferred :: call_benchmark
+      procedure(init), deferred :: init
       procedure :: open_results_file
       procedure :: get_filename
       procedure :: time_benchmark
    end type Benchmark
-
-   type, public, abstract, extends(Benchmark) :: L3Benchmark
-      integer(int64) :: m = 1
-      integer(int64) :: n = 1
-      integer(int64) :: k = 1
-
-      double precision, dimension(:,:), allocatable :: A
-      double precision, dimension(:,:), allocatable :: B
-      double precision, dimension(:,:), allocatable :: C
-   contains
-      procedure :: run => run_l3
-
-   end type L3Benchmark
-
-   type, public, abstract, extends(Benchmark) :: L2Benchmark
-      integer(int64) :: m = 1
-      integer(int64) :: n = 1
-
-      double precision, dimension(:,:), allocatable :: A
-      double precision, dimension(:), allocatable :: x
-      double precision, dimension(:), allocatable :: y
-
-   contains
-      procedure :: run => run_l2
-
-   end type L2Benchmark
-
-   type, public, abstract, extends(Benchmark) :: L1Benchmark
-      integer(int64) :: m = 1
-
-      double precision, dimension(:), allocatable :: X
-      double precision, dimension(:), allocatable :: Y
-
-   contains
-      procedure :: run => run_l1
-
-   end type L1Benchmark
 
    type, public :: BenchmarkContainer
       class(Benchmark), allocatable :: b
@@ -71,6 +37,18 @@ module benchmark_types
          implicit none (external)
          class(Benchmark), intent(inout) :: self
       end subroutine call_benchmark
+
+      subroutine init(self, benchmark_table)
+         import
+         implicit none (external)
+         class(Benchmark), intent(inout) :: self
+         type(toml_table), pointer, intent(in) :: benchmark_table
+
+      end subroutine init
+   end interface
+
+   interface write_header
+      module procedure header_3_dim, header_2_dim, header_1_dim
    end interface
 
 contains
@@ -114,191 +92,154 @@ contains
       return
    end function time_benchmark
 
-   subroutine open_results_file(self, iunit)
+   subroutine open_results_file(self, iunit, file_exists)
       class(Benchmark), intent(inout) :: self
       integer, intent(out) :: iunit
 
-      integer :: i, j, k
       character(len = 64) :: filename
-      logical :: file_exists
+      logical, intent(out) :: file_exists
 
       filename = self%get_filename()
 
       inquire(file=filename, exist=file_exists)
       open(newunit=iunit, file=filename, position="append")
-
-      if (.not. file_exists) then
-         select type (self)
-          class is (L3Benchmark)
-            write(iunit, '(A)', advance='no') 'm,'
-
-            do i = 1, size(self%m_sizes)
-               do j = 1, 9
-                  write(iunit, '(I6,A)', advance='no') self%m_sizes(i), ','
-               end do
-            end do
-            write(iunit, '(A)') ''
-
-            write(iunit, '(A)', advance='no') 'n,'
-
-            do k = 1,3
-               do i = 1, size(self%n_sizes)
-                  do j = 1, 3
-                     write(iunit, '(I6,A)', advance='no') self%n_sizes(i), ','
-                  end do
-               end do
-            end do
-            write(iunit, '(A)') ''
-
-            write(iunit, '(A)', advance='no') 'k,'
-            do j = 1, 9
-               do i = 1, size(self%k_sizes)
-                  write(iunit, '(I6,A)', advance='no') self%n_sizes(i), ','
-               end do
-            end do
-            write(iunit, '(A)') ''
-
-          class is (L2Benchmark)
-            write(iunit, '(A)', advance='no') 'm,'
-
-            do i = 1, size(self%m_sizes)
-               do j = 1, 3
-                  write(iunit, '(I6,A)', advance='no') self%m_sizes(i), ','
-               end do
-            end do
-            write(iunit, '(A)') ''
-
-            write(iunit, '(A)', advance='no') 'n,'
-
-            do j = 1, 3
-               do i = 1, size(self%n_sizes)
-                  write(iunit, '(I6,A)', advance='no') self%n_sizes(i), ','
-               end do
-            end do
-            write(iunit, '(A)') ''
-
-          class is (L1Benchmark)
-            write(iunit, '(A)', advance='no') 'm,'
-            do i = 1, size(self%m_sizes)
-               write(iunit, '(I6,A)', advance='no') self%m_sizes(i), ','
-            end do
-            write(iunit, '(A)') ''
-         end select
-      end if
    end subroutine open_results_file
 
-   subroutine run_l3(self, blas_name)
-      class(L3Benchmark), intent(inout) :: self
-      character(len=16), intent(in) :: blas_name
 
-      integer :: i, j, k, iunit
-      real(real64) :: avg_gflops
+   subroutine read_array(table, arr_name, benchmark_name,  array)
+      !! Read array in toml table called "name" into the provided array
 
-      call self%open_results_file(iunit)
-      write(iunit, '(2A)', advance='no') blas_name, ','
+      type(toml_table), pointer, intent(in) :: table
+      !! toml table containing benchmark config
 
-      do i = 1, size(self%m_sizes)
-         do j = 1, size(self%n_sizes)
-            do k = 1, size(self%k_sizes)
-               self%m = self%m_sizes(i)
-               self%n = self%n_sizes(j)
-               self%k = self%k_sizes(k)
+      character(len=*), intent(in) :: arr_name
+      !! Name of array to read in
 
-               allocate(self%A(self%m , self%k))
-               allocate(self%B(self%k , self%n))
-               allocate(self%C(self%m , self%n))
+      character(len=*), intent(in) :: benchmark_name
+      !! Name of benchmark config we are reading
+      !! Needed for error message
 
-               call random_number(self%A)
-               call random_number(self%B)
-               call random_number(self%C)
+      integer, allocatable, intent(out) ::  array(:)
+      !! Array to populate
 
-               avg_gflops = self%time_benchmark(100)
+      type(toml_array), pointer :: toml_arr
+      !! TOML array to hold size array information
 
-               write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
+      call get_value(table, arr_name, toml_arr)
+      call get_value(toml_arr, array)
 
-               deallocate(self%A)
-               deallocate(self%B)
-               deallocate(self%C)
+      if ( size(array) <= 0 ) then
+         print *, "Missing ",  arr_name, " in ", trim(benchmark_name), " config"
+         stop 1
+      end if
+
+   end subroutine read_array
+
+   subroutine header_3_dim (iunit, dim1_name, dim1, dim2_name, dim2, dim3_name, dim3)
+      character(len=*), intent(in) :: dim1_name
+      !! Name associated with first dimension
+      integer, intent(in), dimension(:) ::  dim1
+      !! Array of sizes of first dimension
+
+      character(len=*), intent(in) :: dim2_name
+      !! Name associated with second dimension
+      integer, intent(in), dimension(:) ::  dim2
+      !! Array of sizes of second dimension
+
+      character(len=*), intent(in) :: dim3_name
+      !! Name associated with third dimension
+      integer, intent(in), dimension(:) ::  dim3
+      !! Array of sizes of third dimension
+
+      integer, intent(in) :: iunit
+      !! Unit to write to
+
+      integer :: i, j, k
+      !! Loop counter
+
+      write(iunit, '(2A)', advance='no') dim1_name, ','
+
+      do i = 1, size(dim1)
+         do j = 1, size(dim2) * size(dim3)
+            write(iunit, '(I6,A)', advance='no') dim1(i), ','
+         end do
+      end do
+      write(iunit, '(A)') ''
+
+      write(iunit, '(2A)', advance='no') dim2_name, ','
+
+      do k = 1, size(dim1)
+         do i = 1, size(dim2)
+            do j = 1, size(dim3)
+               write(iunit, '(I6,A)', advance='no') dim2(i), ','
             end do
          end do
       end do
-
       write(iunit, '(A)') ''
 
-      close(iunit)
-
-   end subroutine run_l3
-
-   subroutine run_l2(self, blas_name)
-      class(L2Benchmark), intent(inout) :: self
-      character(len=16), intent(in) :: blas_name
-      integer :: i, j, iunit
-      real(real64) :: avg_gflops
-
-      call self%open_results_file(iunit)
-      write(iunit, '(2A)', advance='no') blas_name, ','
-
-      do i = 1, size(self%m_sizes)
-         do j = 1, size(self%n_sizes)
-            self%m = self%m_sizes(i)
-            self%n = self%n_sizes(j)
-
-            allocate(self%A(self%m , self%n))
-            allocate(self%x(self%n))
-            allocate(self%y(self%m))
-
-            call random_number(self%A)
-            call random_number(self%x)
-            call random_number(self%y)
-
-            avg_gflops = self%time_benchmark(100)
-
-            write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
-
-            deallocate(self%A)
-            deallocate(self%x)
-            deallocate(self%y)
+      write(iunit, '(2A)', advance='no') dim3_name, ','
+      do j = 1, size(dim1) * size(dim2)
+         do i = 1, size(dim3)
+            write(iunit, '(I6,A)', advance='no') dim3(i), ','
          end do
       end do
+      write(iunit, '(A)') ''
+   end subroutine header_3_dim
 
+   subroutine header_2_dim (iunit, dim1_name, dim1, dim2_name, dim2)
+      character(len=*), intent(in) :: dim1_name
+      !! Name associated with first dimension
+      integer, intent(in), dimension(:) ::  dim1
+      !! Array of sizes of first dimension
+
+      character(len=*), intent(in) :: dim2_name
+      !! Name associated with second dimension
+      integer, intent(in), dimension(:) ::  dim2
+      !! Array of sizes of second dimension
+
+      integer, intent(in) :: iunit
+      !! Unit to write to
+
+      integer :: i, j
+      !! Loop counter
+
+      write(iunit, '(2A)', advance='no') dim1_name, ','
+
+      do i = 1, size(dim1)
+         do j = 1, size(dim2)
+            write(iunit, '(I6,A)', advance='no') dim1(i), ','
+         end do
+      end do
       write(iunit, '(A)') ''
 
-      close(iunit)
+      write(iunit, '(2A)', advance='no') dim2_name, ','
 
-   end subroutine run_l2
+      do i = 1, size(dim2)
+         do j = 1, size(dim1)
+            write(iunit, '(I6,A)', advance='no') dim2(i), ','
+         end do
+      end do
+      write(iunit, '(A)') ''
+   end subroutine header_2_dim
 
-   subroutine run_l1(self, blas_name)
-      class(L1Benchmark), intent(inout) :: self
-      character(len=16), intent(in) :: blas_name
+   subroutine header_1_dim (iunit, dim1_name, dim1)
+      character(len=*), intent(in) :: dim1_name
+      !! Name associated with first dimension
+      integer, intent(in), dimension(:) ::  dim1
+      !! Array of sizes of first dimension
 
-      integer :: i, iunit
-      real(real64) :: avg_gflops
+      integer, intent(in) :: iunit
+      !! Unit to write to
 
-      call self%open_results_file(iunit)
-      write(iunit, '(2A)', advance='no') blas_name, ','
+      integer :: i
+      !! Loop counter
 
-      do i = 1, size(self%m_sizes)
-         self%m = self%m_sizes(i)
+      write(iunit, '(2A)', advance='no') dim1_name, ','
 
-         allocate(self%x(self%m))
-         allocate(self%y(self%m))
-
-         call random_number(self%x)
-         call random_number(self%y)
-
-         self%num_flops = self%m
-
-         avg_gflops = self%time_benchmark(100)
-
-         write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
-
-         deallocate(self%x)
-         deallocate(self%y)
+      do i = 1, size(dim1)
+         write(iunit, '(I6,A)', advance='no') dim1(i), ','
       end do
 
       write(iunit, '(A)') ''
-
-      close(iunit)
-   end subroutine run_l1
-
+   end subroutine header_1_dim
 end module benchmark_types
