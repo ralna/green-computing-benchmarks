@@ -108,14 +108,6 @@ contains
          allocate(DGEMMBenchmark::benchmark%b)
          benchmark%b = DGEMMBenchmark(name="DGEMM")
 
-         !  case ("DSYRK")
-         !    allocate(DSYRKBenchmark::benchmark%b)
-         !    benchmark%b = DSYRKBenchmark(name="DSYRK")
-
-         !  case ("DSYR2K")
-         !    allocate(DSYR2KBenchmark::benchmark%b)
-         !    benchmark%b = DSYR2KBenchmark(name="DSYR2K")
-
        case ("DGEMV")
          allocate(DGEMVBenchmark::benchmark%b)
          benchmark%b = DGEMVBenchmark(name="DGEMV")

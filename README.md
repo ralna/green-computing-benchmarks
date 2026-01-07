@@ -1,17 +1,32 @@
-# CoSeC Green Computing Benchmarks
+# Green Computing Benchmarks
 
-This repository contains a tool for benchmarking mathematical software libraries commonly used by the CCPs.
+This repository contains a tool for benchmarking different implementations of the BLAS library.
 
 ## Installation
 
-The framework uses a [meson](https://mesonbuild.com/index.html) build system. It requires a Fortran compiler, as well as the [FlexiBLAS](https://www.mpi-magdeburg.mpg.de/projects/flexiblas) library.
+This tool has the following dependencies:
+- [meson](https://mesonbuild.com/index.html), version 1.3.2 or newer.
+- A Fortran compiler
+    - The build has been tested with `gfortran 11.4.0` and `ifx 2025.3.0`. The project does not currently build with `flang`. 
+- [FlexiBLAS](https://www.mpi-magdeburg.mpg.de/projects/flexiblas)
+    - All development and testing was done with version `3.4.5`.
 
-To install the framework, run:
+To install the framework:
+
+- Clone this repository
+- Navigate to the green-computing-benchmarks directory
+- Run the following commands:
 
 ```
 meson setup build --optimization=3
 meson compile -C build
 ```
+
+To specify the compiler you want to use, replace the first command with: 
+```
+FC=compiler meson setup build --optimization=3
+```
+Where `compiler` is replaced with your chosen compiler executable.
 
 ## Running
 
@@ -25,12 +40,13 @@ n-sizes = [10, 50, 30]
 k-sizes = [10, 50, 30]
 ```
 
-Where "NAME" corresponds to the function you wish to benchmark. The list of available functions is below; unknown names will be ignored. `m-` `n-` and `k-sizes` correspond to the dimensions of the problems to benchmark on. 
-Benchmarks will be run on the products of these arrays, for example the config above will run on 27 different sized problems.
-Level 3 routines need m, n and k sizes to be specified, level 2 need m and n, and level 1 needs only m. Extra arrays in the config will be ignored.  
+`example.toml` is included at the top level of this repository to demonstrate an example config.
+
+Where "NAME" corresponds to the function you wish to benchmark. The list of available functions is below; unknown names will be ignored. `m-` `n-` and `k-sizes` correspond to the sizes of the matrices and/or vectors the functions will be benchmarked with. 
+Benchmarks will be run on the products of these arrays, for example the config above will run on 27 different sized problems. The problems are randomly generated.
 
 To run the benchmarks, run `build/benchmark_blas config.toml`, where `config.toml` is replaced with the path to your own configuration file.
-A separate csv file will be created for each routine. Alternatively, you can run the `run_blas_benchmarks.sh` script, which will run your chosen benchmarks with all BLAS implementations available to FLEXIBLAS.
+A separate csv file will be created for each routine in the directory you run the tool from. Alternatively, you can run the `run_blas_benchmarks.sh` script, which will run your chosen benchmarks with all BLAS implementations available to FLEXIBLAS.
 
 To manually change the BLAS backend benchmarks are run with, use:
 
@@ -39,15 +55,48 @@ FLEXIBLAS="YOUR_BLAS" ./build/benchmark_blas config.toml
 ```
 Available BLAS backends are shown with `flexiblas list`.
 
-## Available routines
+## Available functions
 
-### Level 1:
+### Level 1 (vector operations):
 - DAXPY
+    - Double precision $\alpha x + y$
+    - Required options:
+        - n-sizes (array)
+- DASUM
+    - Double precision sum of the absolute values of a vector
+    - Required options:
+        - n-sizes (array)
 
-### Level 2:
+### Level 2 (matrix-vector operations):
 - DGEMV
+    - Double precision $\alpha A x + \beta y$
+    - Required options:
+        - m-sizes (array)
+        - n-sizes (array)
 
-### Level 3:
+### Level 3 (matrix-matrix operations):
 - DGEMM
+    - Double precision $\alpha A B + \beta C$
+    - Required options:
+        - m-sizes (array)
+        - n-sizes (array)
+        - k-sizes (array)
+
+- DSYRK
+    - Double precision symmetric rank-k update $\alpha A A^T + \beta C$
+    - Required options:
+        - n-sizes (array)
+        - k-sizes (array)
+
+- DSY2RK
+    - Double precision symmetric rank-2k update $\alpha A B^T + \alpha B A^T+ \beta C$
+    - Required options:
+        - n-sizes (array)
+        - k-sizes (array)
+
 - NAIVE
-    - Naive non-BLAS matrix multiply
+    - Naive non-BLAS matrix multiply $\alpha A B + \beta C$
+    - Required options:
+        - m-sizes (array)
+        - n-sizes (array)
+        - k-sizes (array)

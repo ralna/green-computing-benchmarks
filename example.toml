@@ -17,7 +17,7 @@ n-sizes = [10, 20, 30]
 
 [[benchmarks]]
 name = "DASUM"
-n-sizes = [10, 20, 30]
+n-sizes = [1000, 2000, 3000]
 
 [[benchmarks]]
 name = "NAIVE"
