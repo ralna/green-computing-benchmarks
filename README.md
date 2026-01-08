@@ -1,6 +1,6 @@
 # Green Computing Benchmarks
 
-This repository contains a tool for benchmarking different implementations of the BLAS library.
+This repository contains a tool for benchmarking different implementations of the BLAS and LAPACK libraries.
 
 ## Installation
 
@@ -100,3 +100,10 @@ Available BLAS backends are shown with `flexiblas list`.
         - m-sizes (array)
         - n-sizes (array)
         - k-sizes (array)
+
+### LAPACK Linear solvers
+
+- DGESV
+    - Double precision solution to $Ax = B$
+    - Required options:
+        - n-sizes (array)

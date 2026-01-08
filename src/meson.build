@@ -8,7 +8,7 @@ src += files(
     'blas/l1_interfaces.f90',
     'blas/l2_interfaces.f90',
     'blas/l3_interfaces.f90',
-    # 'lapack/lapack_linsolve.f90',
+    'lapack/lapack_linsolve.f90',
     'lapack/lapack_interfaces.f90',
     'misc/misc.f90'
     )

@@ -4,6 +4,7 @@ module benchmark_config
    use blas_l3_benchmarks, only: DGEMMBenchmark, DSYRKBenchmark, DSYR2KBenchmark
    use blas_l2_benchmarks, only: DGEMVBenchmark
    use blas_l1_benchmarks, only: DAXPYBenchmark, DASUMBenchmark
+   use lapack_linsolve_benchmarks, only: DGESVBenchmark
    use benchmark_types, only: Benchmark, BenchmarkContainer
    use tomlf, only : toml_table, toml_array, toml_parse, toml_error, get_value, len
    implicit none (external)
@@ -127,6 +128,10 @@ contains
        case ("DSYR2K")
          allocate(DSYR2KBenchmark::benchmark%b)
          benchmark%b = DSYR2KBenchmark(name="DSYR2K")
+
+       case ("DGESV")
+         allocate(DGESVBenchmark::benchmark%b)
+         benchmark%b = DGESVBenchmark(name="DGESV")
 
        case ("NAIVE")
          allocate(NaiveMatmulBenchmark::benchmark%b)

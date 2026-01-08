@@ -1,85 +1,97 @@
 module lapack_linsolve_benchmarks
-    use benchmark_types, only: Benchmark
-    use lapack_interfaces, only: dgesv
-    use iso_fortran_env, only: int64, real64
-    implicit none (external)
-    private
+   use benchmark_types, only: Benchmark, read_array, write_header
+   use lapack_interfaces, only: dgesv
+   use iso_fortran_env, only: int64, real64
+   use tomlf, only: toml_table
+   implicit none (external)
+   private
 
-    type, public, extends(Benchmark) :: DGESVBenchmark
-        integer(int64) :: n
-        integer(int64) :: nrhs = 1
-        integer(int64) :: lda
-        integer(int64) :: ldb
+   type, public, extends(Benchmark) :: DGESVBenchmark
+      integer(int64) :: n = 1
+      integer(int64) :: nrhs = 1
 
-        integer info
+      integer :: info = 0
 
-        double precision, dimension(:,:), allocatable :: a
-        double precision, dimension(:,:), allocatable :: b
-        double precision, dimension(:), allocatable :: ipiv
-        
-        contains
-            procedure :: run => run_dgesv
-            procedure :: call_benchmark => call_dgesv
-    end type DGESVBenchmark
+      double precision, dimension(:,:), allocatable :: A
+      double precision, dimension(:,:), allocatable :: B
+      double precision, dimension(:), allocatable :: ipiv
+
+   contains
+      procedure :: run => run_dgesv
+      procedure :: call_benchmark => call_dgesv
+      procedure :: init => init_dgesv
+   end type DGESVBenchmark
 
 contains
-    subroutine run_dgesv(self, blas_name)
-        class(DGESVBenchmark), intent(inout) :: self
 
-        character(len=16), intent(in) :: blas_name
-        
-        integer :: i, iunit
-        real(real64) :: avg_gflops
+   !!!!!!!!!
+   ! DGESV !
+   !!!!!!!!!
+   subroutine init_dgesv(self, benchmark_table)
+      class(DGESVBenchmark), intent(inout) :: self
+      type(toml_table), pointer, intent(in) :: benchmark_table
 
-        self%name = "DGESV"
+      call read_array(benchmark_table, "n-sizes", self%name, self%n_sizes)
 
-        self%min_exp = 4
-        self%max_exp = 13
-        self%base = 2
+   end subroutine init_dgesv
 
-        call self%open_results_file(iunit)
-        write(iunit, '(2A)', advance='no') blas_name, ','
+   subroutine run_dgesv(self, blas_name)
+      class(DGESVBenchmark), intent(inout) :: self
+      character(len=16), intent(in) :: blas_name
 
-        do i = self%min_exp, self%max_exp
-            self%n = self%base**i
-            self%lda = self%base**i
-            self%ldb = self%base**i
+      integer :: i, iunit
+      real(real64) :: avg_gflops
 
-            allocate(self%a(self%lda, self%n))
-            allocate(self%b(self%ldb, self%nrhs))
-            allocate(self%ipiv(self%n))
-    
-            call random_number(self%a)
-            call random_number(self%b)
-            
-            ! From https://www.netlib.org/lapack/lug/node71.html#standardflopcount
-            self%num_flops = 0.67 * self%n ** 3
+      logical :: file_exists
 
-            avg_gflops = self%time_benchmark(100)
+      call self%open_results_file(iunit, file_exists)
 
-            write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
+      if (.not. file_exists) then
+         call write_header( iunit,&
+            "n", self%n_sizes)
+      end if
 
-            deallocate(self%a)
-            deallocate(self%b)
-            deallocate(self%ipiv)
+      write(iunit, '(2A)', advance='no') blas_name, ','
 
-        end do
+      do i = 1, size(self%n_sizes)
+         self%n = self%n_sizes(i)
 
-        close(iunit)
-    end subroutine run_dgesv
+         ! From https://www.netlib.org/lapack/lug/node71.html#standardflopcount
+         self%num_flops = 0.67 * self%n ** 3.0
 
-    subroutine call_dgesv(self)
-        class(DGESVBenchmark), intent(inout) :: self
-        call dgesv(&
-            self%n,&
-            self%nrhs,&
-            self%a,&
-            self%lda,&
-            self%ipiv,&
-            self%b,&
-            self%ldb,&
-            self%info&
-        )
+         allocate(self%A(self%n , self%n))
+         allocate(self%B(self%n , self%nrhs))
+         allocate(self%ipiv(self%n))
 
-    end subroutine call_dgesv
+         call random_number(self%A)
+         call random_number(self%B)
+
+         avg_gflops = self%time_benchmark(100)
+
+         write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
+
+         deallocate(self%A)
+         deallocate(self%B)
+         deallocate(self%ipiv)
+      end do
+
+      write(iunit, '(A)') ''
+
+      close(iunit)
+   end subroutine run_dgesv
+
+   subroutine call_dgesv(self)
+      class(DGESVBenchmark), intent(inout) :: self
+      call dgesv(&
+         self%n,&
+         self%nrhs,&
+         self%A,&
+         self%n,&
+         self%ipiv,&
+         self%B,&
+         self%n,&
+         self%info&
+         )
+
+   end subroutine call_dgesv
 end module lapack_linsolve_benchmarks
