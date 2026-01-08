@@ -1,0 +1,40 @@
+num_repeats = 100
+
+[[benchmarks]]
+name = "DGEMM"
+m-sizes = [10, 20, 30]
+n-sizes = [10, 50, 30]
+k-sizes = [10, 50, 30]
+
+[[benchmarks]]
+name = "DGEMV"
+m-sizes = [10, 20, 30]
+n-sizes = [10, 20, 30]
+
+[[benchmarks]]
+name = "DAXPY"
+n-sizes = [10, 20, 30]
+
+[[benchmarks]]
+name = "DASUM"
+n-sizes = [1000, 2000, 3000]
+
+[[benchmarks]]
+name = "DGESV"
+n-sizes = [100, 200, 300]
+
+[[benchmarks]]
+name = "NAIVE"
+m-sizes = [10, 20, 30]
+n-sizes = [10, 20, 30]
+k-sizes = [10, 20, 30]
+
+[[benchmarks]]
+name = "DSYRK"
+n-sizes = [10, 20, 30]
+k-sizes = [10, 20, 30]
+
+[[benchmarks]]
+name = "DSYR2K"
+n-sizes = [10, 20, 30]
+k-sizes = [10, 20, 30]

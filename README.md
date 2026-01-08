@@ -1,45 +1,109 @@
-# CoSeC Green Computing Benchmarks
+# Green Computing Benchmarks
 
-This repository contains a tool for benchmarking mathematical software libraries commonly used by the CCPs.
+This repository contains a tool for benchmarking different implementations of the BLAS and LAPACK libraries.
 
 ## Installation
 
-The framework uses a [meson](https://mesonbuild.com/index.html) build system. It requires a Fortran compiler, as well as the [FlexiBLAS](https://www.mpi-magdeburg.mpg.de/projects/flexiblas) library.
+This tool has the following dependencies:
+- [meson](https://mesonbuild.com/index.html), version 1.3.2 or newer.
+- A Fortran compiler
+    - The build has been tested with `gfortran 11.4.0` and `ifx 2025.3.0`. The project does not currently build with `flang`. 
+- [FlexiBLAS](https://www.mpi-magdeburg.mpg.de/projects/flexiblas)
+    - All development and testing was done with version `3.4.5`.
 
-To install the framework, run:
+To install the framework:
+
+- Clone this repository
+- Navigate to the green-computing-benchmarks directory
+- Run the following commands:
 
 ```
-meson setup builddir --optimization=3
-meson compile -C builddir
+meson setup build --optimization=3
+meson compile -C build
 ```
 
-Optionally, GPU and MPI enabled benchmarks can be built by running
+To specify the compiler you want to use, replace the first command with: 
 ```
-meson setup builddir --optimization=3 -Dgpu=true -Dmpi=true
-meson compile -C builddir
+FC=compiler meson setup build --optimization=3
 ```
-
-The MPI benchmarks require SCALAPACK to be installed, and the GPU benchmarks require [SLATE](https://github.com/icl-utk-edu/slate/tree/master).
+Where `compiler` is replaced with your chosen compiler executable.
 
 ## Running
 
-To run the benchmarks, run the `green_computing_benchmark` executable in `builddir`. By default this will write the results to `results.csv`. An alternative filename can be supplied as an additional command line argument.
-
- To change the BLAS backend benchmarks are run with, use:
+You can specify the benchmarks you wish to run using a [toml](https://toml.io/en/) configuration file. To add a function to benchmark, use the syntax:
 
 ```
-FLEXIBLAS="YOUR_BLAS" ./green_computing_benchmark
+[[benchmarks]]
+name = "NAME"
+m-sizes = [10, 20, 30]
+n-sizes = [10, 50, 30]
+k-sizes = [10, 50, 30]
 ```
 
-Available BLAS backends are shown with `flexiblas list`
+`example.toml` is included at the top level of this repository to demonstrate an example config.
 
-## Adding new benchmarks
+Where "NAME" corresponds to the function you wish to benchmark. The list of available functions is below; unknown names will be ignored. `m-` `n-` and `k-sizes` correspond to the sizes of the matrices and/or vectors the functions will be benchmarked with. 
+Benchmarks will be run on the products of these arrays, for example the config above will run on 27 different sized problems. The problems are randomly generated.
 
-Benchmarks are implemented as derived types which extend the `Benchmark` type. They must provide:
+To run the benchmarks, run `build/benchmark_blas config.toml`, where `config.toml` is replaced with the path to your own configuration file.
+A separate csv file will be created for each routine in the directory you run the tool from. Alternatively, you can run the `run_blas_benchmarks.sh` script, which will run your chosen benchmarks with all BLAS implementations available to FLEXIBLAS.
 
-- A `num_flops` member, which is the total number of floating point operations performed during the benchmark,
-- A `name` member,
-- A `setup` subroutine. This is called once to intialise any data which is needed to run the benchmark,
-- A `run` subroutine. This is the part of the benchmark which is actually timed, so should only include code which runs the calculation of interest.
+To manually change the BLAS backend benchmarks are run with, use:
 
-Once the new type has been created, add the new benchmark to `benchmark_array` in `main.f90`.
+```
+FLEXIBLAS="YOUR_BLAS" ./build/benchmark_blas config.toml
+```
+Available BLAS backends are shown with `flexiblas list`.
+
+## Available functions
+
+### Level 1 (vector operations):
+- DAXPY
+    - Double precision $\alpha x + y$
+    - Required options:
+        - n-sizes (array)
+- DASUM
+    - Double precision sum of the absolute values of a vector
+    - Required options:
+        - n-sizes (array)
+
+### Level 2 (matrix-vector operations):
+- DGEMV
+    - Double precision $\alpha A x + \beta y$
+    - Required options:
+        - m-sizes (array)
+        - n-sizes (array)
+
+### Level 3 (matrix-matrix operations):
+- DGEMM
+    - Double precision $\alpha A B + \beta C$
+    - Required options:
+        - m-sizes (array)
+        - n-sizes (array)
+        - k-sizes (array)
+
+- DSYRK
+    - Double precision symmetric rank-k update $\alpha A A^T + \beta C$
+    - Required options:
+        - n-sizes (array)
+        - k-sizes (array)
+
+- DSY2RK
+    - Double precision symmetric rank-2k update $\alpha A B^T + \alpha B A^T+ \beta C$
+    - Required options:
+        - n-sizes (array)
+        - k-sizes (array)
+
+- NAIVE
+    - Naive non-BLAS matrix multiply $\alpha A B + \beta C$
+    - Required options:
+        - m-sizes (array)
+        - n-sizes (array)
+        - k-sizes (array)
+
+### LAPACK Linear solvers
+
+- DGESV
+    - Double precision solution to $Ax = B$
+    - Required options:
+        - n-sizes (array)

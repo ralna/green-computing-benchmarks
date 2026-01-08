@@ -1,9 +1,0 @@
-option('gpu',
-       type : 'boolean',
-       value : false,
-       description : 'Build GPU benchmarks (requires SLATE)')
-
-option('mpi',
-       type : 'boolean',
-       value : false,
-       description : 'Build MPI benchmarks (requires SCALAPACK)')
