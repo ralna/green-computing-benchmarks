@@ -2,9 +2,15 @@ num_repeats = 100
 
 [[benchmarks]]
 name = "DGEMM"
-m-sizes = [10, 20, 30]
-n-sizes = [10, 50, 30]
-k-sizes = [10, 50, 30]
+m-sizes = [100, 200, 300]
+n-sizes = [100, 500, 300]
+k-sizes = [100, 500, 300]
+
+[[benchmarks]]
+name = "CU_DGEMM"
+m-sizes = [100, 200, 300]
+n-sizes = [100, 500, 300]
+k-sizes = [100, 500, 300]
 
 [[benchmarks]]
 name = "DGEMV"

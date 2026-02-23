@@ -29,6 +29,13 @@ tomlf_dep = dependency(
 
 deps += tomlf_dep
 
+cublas_dep = dependency('cublas-12.9')
+cuda_dep = dependency('cudart-12.9')
+
+deps += cublas_dep
+deps += cuda_dep
+
+
 ###################
 # Build library   #
 ###################

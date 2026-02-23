@@ -4,6 +4,7 @@ module benchmark_config
    use blas_l3_benchmarks, only: DGEMMBenchmark, DSYRKBenchmark, DSYR2KBenchmark
    use blas_l2_benchmarks, only: DGEMVBenchmark
    use blas_l1_benchmarks, only: DAXPYBenchmark, DASUMBenchmark
+   use cublas_benchmarks,  only: CUBLASDGEMMBenchmark
    use lapack_linsolve_benchmarks, only: DGESVBenchmark
    use benchmark_types, only: Benchmark, BenchmarkContainer
    use tomlf, only : toml_table, toml_array, toml_parse, toml_error, get_value, len
@@ -136,6 +137,10 @@ contains
        case ("NAIVE")
          allocate(NaiveMatmulBenchmark::benchmark%b)
          benchmark%b = NaiveMatmulBenchmark(name="Naive")
+
+       case ("CU_DGEMM")
+         allocate(CUBLASDGEMMBenchmark::benchmark%b)
+         benchmark%b = CUBLASDGEMMBenchmark(name="CUBLAS_DGEMM")
 
        case default
          allocate(DummyBenchmark::benchmark%b)
