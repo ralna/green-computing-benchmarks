@@ -1,16 +1,16 @@
 module cublas_benchmarks
    use benchmark_types, only: Benchmark, read_array, write_header
    use iso_fortran_env, only: int64, real64, int32
-   use iso_c_binding, only: c_ptr, c_null_ptr, c_size_t, c_int, c_double
+   use iso_c_binding, only: c_ptr, c_null_ptr, c_size_t, c_int, c_long, c_double
    use cuda_interfaces
    use tomlf, only: toml_table
    implicit none (external)
    private
 
    type, public, extends(Benchmark) :: CUBLASDGEMMBenchmark
-      integer(c_int) :: m = 1
-      integer(c_int) :: n = 1
-      integer(c_int) :: k = 1
+      integer(c_long) :: m = 1
+      integer(c_long) :: n = 1
+      integer(c_long) :: k = 1
 
       real(c_double) :: alpha = 1.0
       real(c_double) :: beta = 1.0
@@ -137,7 +137,7 @@ contains
 
       alpha_t = self%alpha
       beta_t = self%beta
-      
+
 
       stat = cublasDgemm(&
          self%handle,&
@@ -155,5 +155,7 @@ contains
          self%C_d,&
          self%m&
          )
+
+      stat = cudaDeviceSynchronize()
    end subroutine call_cublas_dgemm
 end module cublas_benchmarks

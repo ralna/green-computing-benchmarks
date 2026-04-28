@@ -26,18 +26,18 @@ module cuda_interfaces
 
       function cublasDgemm(handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc) &
          bind(C, name="cublasDgemm_v2")
-         import :: c_ptr, c_int, c_double
+         import :: c_ptr, c_int, c_long, c_double
          type(c_ptr), value :: handle
          integer(c_int), value :: transa, transb
-         integer(c_int), value :: m, n, k
+         integer(c_long), value :: m, n, k
          real(c_double), value :: alpha
          type(c_ptr), value :: A
-         integer(c_int), value :: lda
+         integer(c_long), value :: lda
          type(c_ptr), value :: B
-         integer(c_int), value :: ldb
+         integer(c_long), value :: ldb
          real(c_double), value :: beta
          type(c_ptr), value :: C
-         integer(c_int), value :: ldc
+         integer(c_long), value :: ldc
          integer(c_int) :: cublasDgemm
       end function
 
@@ -64,7 +64,7 @@ module cuda_interfaces
          integer(c_int) :: cudaMalloc
       end function cudaMalloc
 
-      function cudaDeviceSynchronize() bind(C)
+      function cudaDeviceSynchronize() bind(C, name="cudaDeviceSynchronize")
          import :: c_int
          integer(c_int) :: cudaDeviceSynchronize
       end function
