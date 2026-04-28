@@ -35,6 +35,13 @@ cuda_dep = dependency('cudart-12.9')
 deps += cublas_dep
 deps += cuda_dep
 
+hipfort_dep = dependency('hipfort', modules:['hipfort::hipfort-amdgcn'])
+deps += hipfort_dep
+
+hipblas_dep = dependency('hipblas')
+deps += hipblas_dep
+
+
 
 ###################
 # Build library   #
