@@ -158,15 +158,14 @@ contains
 
    subroutine call_cublas_dgemm(self)
       class(CUBLASDGEMMBenchmark), intent(inout) :: self
-      integer :: stat
+      integer :: flag
 
       real(c_double), target :: alpha_t, beta_t
 
       alpha_t = self%alpha
       beta_t = self%beta
 
-
-      stat = cublasDgemm(&
+      call cuda_err_check(cublasDgemm(&
          self%handle,&
          CUBLAS_OP_N,&
          CUBLAS_OP_N,&
@@ -181,8 +180,12 @@ contains
          c_loc(beta_t),&
          self%C_d,&
          self%m&
-         )
+         ), flag)
 
-      stat = cudaDeviceSynchronize()
+      if ( flag == 1 ) then
+         print *, "Failed to run CUBLAS DGEMM"
+      end if
+
+      call cuda_err_check(cudaDeviceSynchronize(), flag)
    end subroutine call_cublas_dgemm
 end module cublas_benchmarks
