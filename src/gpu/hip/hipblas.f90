@@ -35,6 +35,17 @@ module hipblas_benchmarks
    end type HIPBLASDGEMMBenchmark
 
 contains
+
+   subroutine hip_error_check(stat, flag)
+      integer(c_int), intent(in) :: stat
+      integer, intent(out) :: flag
+
+      if ( stat /= 0 ) then
+         print *, "HIP failed with error: ", stat
+         flag = 1
+      end if
+   end subroutine hip_error_check
+
    !!!!!!!!!!!!!!!!!
    ! HIPBLAS DGEMM !
    !!!!!!!!!!!!!!!!!
@@ -52,7 +63,7 @@ contains
       character(len=16), intent(in) :: blas_name
 
       ! status codes
-      integer(c_int) :: istat
+      integer(c_int) :: flag
 
       integer :: i, j, k, iunit
       real(real64) :: avg_gflops
@@ -60,8 +71,12 @@ contains
 
       ! Set handle
       self%handle = c_null_ptr
-      istat = hipblasCreate(self%handle)
-  
+      call hip_error_check(hipblasCreate(self%handle), flag)
+
+      if ( flag == 1 ) then
+         print *, "Failed to create HIPLAS handle"
+         return
+      end if
 
       call self%open_results_file(iunit, file_exists)
 
@@ -92,17 +107,22 @@ contains
                call random_number(self%C)
 
                ! Allocate device memory and copy from host
-               istat = hipMalloc(self%A_d, source=self%A)
-               istat = hipMalloc(self%B_d, source=self%B)
-               istat = hipMalloc(self%C_d, source=self%C)
+               call hip_error_check(hipMalloc(self%A_d, source=self%A), flag)
+               call hip_error_check(hipMalloc(self%B_d, source=self%B), flag)
+               call hip_error_check(hipMalloc(self%C_d, source=self%C), flag)
 
-               avg_gflops = self%time_benchmark(100)
+               if ( flag == 1 ) then
+                  print *, "Failed to run CUBLAS DGEMM"
+                  avg_gflops = -1
+               else
+                  avg_gflops = self%time_benchmark(100)
+               end if
 
                write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
 
-               istat = hipFree(self%A_d)
-               istat = hipFree(self%B_d)
-               istat = hipFree(self%C_d)
+               call hip_error_check(hipFree(self%A_d), flag)
+               call hip_error_check(hipFree(self%B_d), flag)
+               call hip_error_check(hipFree(self%C_d), flag)
 
                deallocate(self%A)
                deallocate(self%B)
@@ -118,9 +138,9 @@ contains
 
    subroutine call_hipblas_dgemm(self)
       class(HIPBLASDGEMMBenchmark), intent(inout) :: self
-      integer :: stat
+      integer :: flag
 
-      stat = hipblasdgemm(&
+      call hip_error_check(hipblasdgemm(&
          self%handle,&
          HIPBLAS_OP_N,&
          HIPBLAS_OP_N,&
@@ -135,8 +155,12 @@ contains
          self%beta,&
          self%C_d,&
          self%m&
-         )
+         ), flag)
 
-      stat = hipDeviceSynchronize()
+      call hip_error_check(hipDeviceSynchronize(), flag)
+
+      if ( flag == 1 ) then
+         print *, "Failed to run HIPBLAS DGEMM"
+      end if
    end subroutine call_hipblas_dgemm
 end module hipblas_benchmarks
