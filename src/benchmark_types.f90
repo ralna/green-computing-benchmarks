@@ -52,24 +52,10 @@ module benchmark_types
    end interface
 
 contains
-   subroutine format_time_str(ts)
-      character(len=*), intent(out) :: ts
-      integer :: values(8)
-      character(len=32) :: tmp
-      call date_and_time(values=values)
-      write(tmp, '(I0,A,I0,A,I0,A,I0,A,I0,A,I0)') &
-         values(1),"-",values(2),"-",values(3),"_", &
-         values(5),":",values(6),":",values(7)
-      ts = trim(adjustl(tmp))
-   end subroutine format_time_str
-
-   character(len=256) function get_filename(self) result(filename)
+   character(len=64) function get_filename(self) result(filename)
       class(Benchmark), intent(inout) :: self
-      character(len=80) :: time_str
 
-      call format_time_str(time_str)
-
-      filename = "results_"//trim(self%name)//"_"//trim(time_str)//".csv"
+      filename = "results_"//trim(self%name)//".csv"
       return
    end function get_filename
 
@@ -103,6 +89,7 @@ contains
       end do
 
       max_flops = max_flops / (1000.0**3)
+      print *, max_flops
       return
    end function time_benchmark
 
@@ -110,7 +97,7 @@ contains
       class(Benchmark), intent(inout) :: self
       integer, intent(out) :: iunit
 
-      character(len = 256) :: filename
+      character(len = 64) :: filename
       logical, intent(out) :: file_exists
 
       filename = self%get_filename()
