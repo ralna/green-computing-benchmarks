@@ -72,7 +72,7 @@ contains
             "k", self%k_sizes)
       end if
 
-      write(iunit, '(2A)', advance='no') blas_name, ','
+      write(iunit, '(A)', advance='no') 'GFLOPS/s,'
 
       do i = 1, size(self%m_sizes)
          do j = 1, size(self%n_sizes)
@@ -95,8 +95,6 @@ contains
                istat = hipMalloc(self%A_d, source=self%A)
                istat = hipMalloc(self%B_d, source=self%B)
                istat = hipMalloc(self%C_d, source=self%C)
-
-               print *, istat
 
                avg_gflops = self%time_benchmark(100)
 

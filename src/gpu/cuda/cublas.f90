@@ -72,7 +72,7 @@ contains
             "k", self%k_sizes)
       end if
 
-      write(iunit, '(2A)', advance='no') blas_name, ','
+      write(iunit, '(A)', advance='no') 'GFLOPS/s,'
 
       do i = 1, size(self%m_sizes)
          do j = 1, size(self%n_sizes)
@@ -109,7 +109,7 @@ contains
                istat = cudaMemcpy(self%C_d,&
                   c_loc(self%C(1,1)), int(self%m*self%n, c_size_t)*c_sizeof(self%C(1,1)), cudaMemcpyHostToDevice)
 
-               avg_gflops = self%time_benchmark(100)
+               print *, istat
 
                write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
 
