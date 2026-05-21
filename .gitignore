@@ -4,3 +4,5 @@
 *.png
 
 .vscode
+
+subprojects/test-drive.wrap
