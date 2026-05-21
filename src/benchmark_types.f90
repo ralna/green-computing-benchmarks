@@ -89,7 +89,6 @@ contains
       end do
 
       max_flops = max_flops / (1000.0**3)
-      print *, max_flops
       return
    end function time_benchmark
 
