@@ -1,16 +1,16 @@
 module cublas_benchmarks
    use benchmark_types, only: Benchmark, read_array, write_header
    use iso_fortran_env, only: int64, real64, int32
-   use iso_c_binding, only: c_ptr, c_null_ptr, c_size_t, c_int, c_double
+   use iso_c_binding, only: c_ptr, c_null_ptr, c_size_t, c_int, c_long, c_double
    use cuda_interfaces
    use tomlf, only: toml_table
    implicit none (external)
    private
 
    type, public, extends(Benchmark) :: CUBLASDGEMMBenchmark
-      integer(c_int) :: m = 1
-      integer(c_int) :: n = 1
-      integer(c_int) :: k = 1
+      integer(c_long) :: m = 1
+      integer(c_long) :: n = 1
+      integer(c_long) :: k = 1
 
       real(c_double) :: alpha = 1.0
       real(c_double) :: beta = 1.0
@@ -35,6 +35,15 @@ module cublas_benchmarks
    end type CUBLASDGEMMBenchmark
 
 contains
+   subroutine cuda_err_check(stat, flag)
+      integer, intent(in) :: stat
+      integer, intent(out) :: flag
+
+      if ( stat /= 0 ) then
+         print *, "CUDA failed with error: ", stat
+         flag = 1
+      end if
+   end subroutine cuda_err_check
 
    !!!!!!!!!!!!!!!!
    ! CUBLAS DGEMM !
@@ -52,16 +61,19 @@ contains
       class(CUBLASDGEMMBenchmark), intent(inout) :: self
       character(len=16), intent(in) :: blas_name
 
-      ! status codes
-      integer(c_int) :: istat
-
       integer :: i, j, k, iunit
       real(real64) :: avg_gflops
       logical :: file_exists
+      integer :: flag = 0
 
       ! init CUBLAS handle
       self%handle = c_null_ptr
-      istat = cublasCreate(self%handle)
+      call cuda_err_check(cublasCreate(self%handle), flag)
+
+      if ( flag == 1 ) then
+         print *, "Failed to create CUBLAS handle"
+         return
+      end if
 
       call self%open_results_file(iunit, file_exists)
 
@@ -72,7 +84,7 @@ contains
             "k", self%k_sizes)
       end if
 
-      write(iunit, '(2A)', advance='no') blas_name, ','
+      write(iunit, '(A)', advance='no') 'GFLOPS/s,'
 
       do i = 1, size(self%m_sizes)
          do j = 1, size(self%n_sizes)
@@ -92,34 +104,49 @@ contains
                call random_number(self%C)
 
                ! Allocate device memory
-               istat = cudaMalloc(self%A_d,&
-                  int(self%m*self%k, c_size_t)*c_sizeof(self%A(1,1)))
-               istat = cudaMalloc(self%B_d,&
-                  int(self%k*self%n, c_size_t)*c_sizeof(self%B(1,1)))
-               istat = cudaMalloc(self%C_d,&
-                  int(self%m*self%n, c_size_t)*c_sizeof(self%C(1,1)))
+               call cuda_err_check(cudaMalloc(self%A_d,&
+                  int(self%m*self%k, c_size_t)*c_sizeof(self%A(1,1))),&
+                  flag)
+               call cuda_err_check(cudaMalloc(self%B_d,&
+                  int(self%k*self%n, c_size_t)*c_sizeof(self%B(1,1))),&
+                  flag)
+               call cuda_err_check(cudaMalloc(self%C_d,&
+                  int(self%m*self%n, c_size_t)*c_sizeof(self%C(1,1))),&
+                  flag)
 
                ! Copy to device
-               istat = cudaMemcpy(self%A_d,&
-                  c_loc(self%A(1,1)), int(self%m*self%k, c_size_t)*c_sizeof(self%A(1,1)), cudaMemcpyHostToDevice)
+               call cuda_err_check(cudaMemcpy(self%A_d,&
+                  c_loc(self%A(1,1)), int(self%m*self%k, c_size_t)*c_sizeof(self%A(1,1)), cudaMemcpyHostToDevice),&
+                  flag)
 
-               istat = cudaMemcpy(self%B_d,&
-                  c_loc(self%B(1,1)), int(self%k*self%n, c_size_t)*c_sizeof(self%B(1,1)), cudaMemcpyHostToDevice)
+               call cuda_err_check(cudaMemcpy(self%B_d,&
+                  c_loc(self%B(1,1)), int(self%k*self%n, c_size_t)*c_sizeof(self%B(1,1)), cudaMemcpyHostToDevice),&
+                  flag)
 
-               istat = cudaMemcpy(self%C_d,&
-                  c_loc(self%C(1,1)), int(self%m*self%n, c_size_t)*c_sizeof(self%C(1,1)), cudaMemcpyHostToDevice)
+               call cuda_err_check(cudaMemcpy(self%C_d,&
+                  c_loc(self%C(1,1)), int(self%m*self%n, c_size_t)*c_sizeof(self%C(1,1)), cudaMemcpyHostToDevice),&
+                  flag)
 
-               avg_gflops = self%time_benchmark(100)
+               if ( flag == 1 ) then
+                  print *, "Failed to run CUBLAS DGEMM"
+                  avg_gflops = -1
+               else
+                  avg_gflops = self%time_benchmark(100)
+               end if
+
+               call cuda_err_check(cudaFree(self%A_d), flag)
+               call cuda_err_check(cudaFree(self%B_d), flag)
+               call cuda_err_check(cudaFree(self%C_d), flag)
 
                write(iunit, '(F13.7,A)', advance='no') avg_gflops, ','
-
-               istat = cudaFree(self%A_d)
-               istat = cudaFree(self%B_d)
-               istat = cudaFree(self%C_d)
 
                deallocate(self%A)
                deallocate(self%B)
                deallocate(self%C)
+
+               if (flag == 1) then
+                  return
+               end if
             end do
          end do
       end do
@@ -131,15 +158,14 @@ contains
 
    subroutine call_cublas_dgemm(self)
       class(CUBLASDGEMMBenchmark), intent(inout) :: self
-      integer :: stat
+      integer :: flag
 
       real(c_double), target :: alpha_t, beta_t
 
       alpha_t = self%alpha
       beta_t = self%beta
-      
 
-      stat = cublasDgemm(&
+      call cuda_err_check(cublasDgemm(&
          self%handle,&
          CUBLAS_OP_N,&
          CUBLAS_OP_N,&
@@ -154,6 +180,12 @@ contains
          c_loc(beta_t),&
          self%C_d,&
          self%m&
-         )
+         ), flag)
+
+      if ( flag == 1 ) then
+         print *, "Failed to run CUBLAS DGEMM"
+      end if
+
+      call cuda_err_check(cudaDeviceSynchronize(), flag)
    end subroutine call_cublas_dgemm
 end module cublas_benchmarks

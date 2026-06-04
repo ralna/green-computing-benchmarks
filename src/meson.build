@@ -11,6 +11,7 @@ src += files(
     'lapack/lapack_linsolve.f90',
     'lapack/lapack_interfaces.f90',
     'misc/misc.f90',
-    'gpu/cublas.f90',
-    'gpu/cuda_interfaces.f90',
+    'gpu/cuda/cublas.f90',
+    'gpu/cuda/cuda_interfaces.f90',
+    'gpu/hip/hipblas.f90',
     )

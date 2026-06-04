@@ -4,10 +4,19 @@ module benchmark_config
    use blas_l3_benchmarks, only: DGEMMBenchmark, DSYRKBenchmark, DSYR2KBenchmark
    use blas_l2_benchmarks, only: DGEMVBenchmark
    use blas_l1_benchmarks, only: DAXPYBenchmark, DASUMBenchmark
-   use cublas_benchmarks,  only: CUBLASDGEMMBenchmark
+
    use lapack_linsolve_benchmarks, only: DGESVBenchmark
    use benchmark_types, only: Benchmark, BenchmarkContainer
    use tomlf, only : toml_table, toml_array, toml_parse, toml_error, get_value, len
+
+#ifdef CUDA
+   use cublas_benchmarks,  only: CUBLASDGEMMBenchmark
+#endif
+
+#ifdef HIP
+   use hipblas_benchmarks,  only: HIPBLASDGEMMBenchmark
+#endif
+
    implicit none (external)
    public read_config
    private
@@ -138,10 +147,16 @@ contains
          allocate(NaiveMatmulBenchmark::benchmark%b)
          benchmark%b = NaiveMatmulBenchmark(name="Naive")
 
+#ifdef CUDA
        case ("CU_DGEMM")
          allocate(CUBLASDGEMMBenchmark::benchmark%b)
          benchmark%b = CUBLASDGEMMBenchmark(name="CUBLAS_DGEMM")
-
+#endif
+#ifdef HIP
+        case ("HIP_DGEMM")
+         allocate(HIPBLASDGEMMBenchmark::benchmark%b)
+         benchmark%b = HIPBLASDGEMMBenchmark(name="HIPBLAS_DGEMM")
+#endif
        case default
          allocate(DummyBenchmark::benchmark%b)
          benchmark%b = DummyBenchmark(name="failed")

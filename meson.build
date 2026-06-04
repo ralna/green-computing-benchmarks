@@ -1,8 +1,9 @@
-project('green_computing_benchmark', 'fortran', 'c',
-  version : '0.1.0',
-  default_options : [
-    'warning_level=3'
-  ],
+project(
+  'green_computing_benchmark',
+  'fortran',
+  'c',
+  version: '0.1.0',
+  default_options: ['warning_level=3'],
   meson_version: '>=1.3.2',
 )
 ###################
@@ -11,6 +12,10 @@ project('green_computing_benchmark', 'fortran', 'c',
 
 src = []
 deps = []
+pp_args = ['-cpp']
+
+use_cuda = get_option('cuda')
+use_hip = get_option('hip')
 
 fc = meson.get_compiler('fortran')
 
@@ -29,12 +34,20 @@ tomlf_dep = dependency(
 
 deps += tomlf_dep
 
-cublas_dep = dependency('cublas-12.9')
-cuda_dep = dependency('cudart-12.9')
+if use_cuda
+  cuda_dep = dependency('cuda', version: '>=11.0', modules: ['cublas', 'cudart'])
+  deps += cuda_dep
+  pp_args += ['-DCUDA']
+endif
 
-deps += cublas_dep
-deps += cuda_dep
+if use_hip
+  hipfort_dep = dependency('hipfort', modules: ['hipfort::hipfort-amdgcn'])
+  deps += hipfort_dep
 
+  hipblas_dep = dependency('hipblas')
+  deps += hipblas_dep
+  pp_args += ['-DHIP']
+endif
 
 ###################
 # Build library   #
@@ -44,8 +57,10 @@ flexiblas_dep = dependency('flexiblas')
 deps += flexiblas_dep
 
 executable(
-  'benchmark_blas', src,
+  'benchmark_blas',
+  src,
+  fortran_args: pp_args,
   dependencies: deps,
-  link_language : 'fortran',
-  install : true,
+  link_language: 'fortran',
+  install: true,
 )

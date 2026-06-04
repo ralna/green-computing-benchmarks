@@ -1,0 +1,13 @@
+option(
+    'cuda',
+    type: 'boolean',
+    value: false,
+    description: 'Enable CUDA benchmarks',
+)
+
+option(
+    'hip',
+    type: 'boolean',
+    value: false,
+    description: 'Enable HIP benchmarks',
+)
