@@ -69,7 +69,7 @@ Where "NAME" corresponds to the function you wish to benchmark. The list of avai
 Benchmarks will be run on the products of these arrays, for example the config above will run on 27 different sized problems. The problems are randomly generated.
 
 To run the benchmarks, run `build/benchmark_blas config.toml`, where `config.toml` is replaced with the path to your own configuration file.
-A separate csv file will be created for each routine in the directory you run the tool from. Alternatively, you can run the `run_blas_benchmarks.sh` script, which will run your chosen benchmarks with all BLAS implementations available to FLEXIBLAS. We recommend that this script is not used for GPU runs, as changing the BLAS  implementation will have no effect but multiple runs will still be performed.
+A separate csv file will be created for each routine in the directory you run the tool from. Alternatively, you can run the `run_blas_benchmarks.sh` script, which will run your chosen benchmarks with all BLAS implementations available to FLEXIBLAS and collect all results files in a timestamped directory. We recommend that this script is not used for GPU runs, as changing the BLAS  implementation will have no effect but multiple runs will still be performed.
 The same is true of the `NAIVE` benchmark option.
 
 To manually change the BLAS backend benchmarks are run with, use:
